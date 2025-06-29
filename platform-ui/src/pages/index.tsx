@@ -176,7 +176,7 @@ export default function HomePage() {
             style={styles.textarea}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="E.g., 'A modern, clean, light-themed landing page for a coffee shop. Include a hero section with a large image and headline, a menu with 3-4 items, and a contact form. Use subtle animations. Primary color: deep brown (#4A2A0D), Accent: cream (#F5F5DC). Fonts: Playfair Display (serif) for headings, Roboto (sans-serif) for body. Make it a single functional component called LandingPage.'"
+            placeholder="E.g., &apos;A modern, clean, light-themed landing page for a coffee shop. Include a hero section with a large image and headline, a menu with 3-4 items, and a contact form. Use subtle animations. Primary color: deep brown (#4A2A0D), Accent: cream (#F5F5DC). Fonts: Playfair Display (serif) for headings, Roboto (sans-serif) for body. Make it a single functional component called LandingPage.&apos;"
             rows={8}
             disabled={isLoading}
           ></textarea>

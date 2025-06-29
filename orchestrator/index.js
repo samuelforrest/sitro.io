@@ -1,4 +1,4 @@
-/// orchestrator/index.js
+// orchestrator/index.js
 require('dotenv').config(); // Load environment variables (locally for testing, but does nothing in Cloud Run)
 const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -16,7 +16,7 @@ const port = process.env.PORT || 8080;
 // These read directly from process.env, which is what Cloud Run provides
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // This is the key we're debugging
 const githubUsername = process.env.GITHUB_USERNAME;
 const githubPat = process.env.GITHUB_PAT;
 const vercelApiToken = process.env.VERCEL_API_TOKEN;
@@ -24,19 +24,26 @@ const vercelTeamId = process.env.VERCEL_TEAM_ID;
 const vercelDomain = process.env.VERCEL_DOMAIN;
 const boilerplateRepoUrl = process.env.BOILERPLATE_REPO_URL;
 const boilerplateRepoBranch = process.env.BOILERPLATE_REPO_BRANCH || 'main';
-const frontendUrl = process.env.FRONTEND_URL; // Explicitly get FRONTEND_URL here
+const frontendUrl = process.env.FRONTEND_URL;
 
 // --- STARTUP LOGGING FOR DEBUGGING ---
 console.log('Orchestrator Startup Diagnostics:');
 console.log(`  PORT: ${port}`);
 console.log(`  GEMINI_API_KEY_LOADED: ${!!geminiApiKey}`);
 console.log(`  SUPABASE_URL_LOADED: ${!!supabaseUrl}`);
+// >>>>>>> ADDED EXTREME SUPABASE KEY DEBUGGING <<<<<<<
+console.log(`  SUPABASE_SERVICE_KEY (RAW): '${process.env.SUPABASE_SERVICE_KEY}'`);
+console.log(`  SUPABASE_SERVICE_KEY (LENGTH): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY.length : 'N/A'}`);
+console.log(`  SUPABASE_SERVICE_KEY (TRIMMED LENGTH): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY.trim().length : 'N/A'}`);
+console.log(`  SUPABASE_SERVICE_KEY (CHAR 0): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY[0] : 'N/A'}`);
+console.log(`  SUPABASE_SERVICE_KEY (CHAR LAST): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY[process.env.SUPABASE_SERVICE_KEY.length - 1] : 'N/A'}`);
+// >>>>>>> END EXTREME SUPABASE KEY DEBUGGING <<<<<<<
 console.log(`  GITHUB_USERNAME_LOADED: ${!!githubUsername}`);
 console.log(`  VERCEL_API_TOKEN_LOADED: ${!!vercelApiToken}`);
 console.log(`  VERCEL_DOMAIN_LOADED: ${!!vercelDomain}`);
 console.log(`  BOILERPLATE_REPO_URL_LOADED: ${!!boilerplateRepoUrl}`);
-console.log(`  FRONTEND_URL (RAW from process.env): '${process.env.FRONTEND_URL}'`); // Raw value from environment
-console.log(`  FRONTEND_URL (TRIMMED for CORS): '${frontendUrl ? frontendUrl.trim() : 'undefined/null'}'`); // Trimmed value
+console.log(`  FRONTEND_URL (RAW from process.env): '${process.env.FRONTEND_URL}'`);
+console.log(`  FRONTEND_URL (TRIMMED for CORS): '${frontendUrl ? frontendUrl.trim() : 'undefined/null'}'`);
 // --- END STARTUP LOGGING ---
 
 // Validate essential environment variables
@@ -55,24 +62,25 @@ if (!geminiApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !
     process.exit(1); // Force exit if critical variables are missing
 }
 console.log('All essential environment variables confirmed.');
-console.log(`Orchestrator will allow CORS from: '${frontendUrl.trim()}'`); // Log the trimmed value that will be used for CORS
+console.log(`Orchestrator will allow CORS from: '${frontendUrl.trim()}'`);
 
 // Google Gemini
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Supabase Client
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// This is the line that's failing with Invalid URL. It's using the raw variable.
+const supabase = createClient(supabaseUrl, supabaseServiceKey); 
 
 app.use(express.json());
-
-// --- CRITICAL CORS CONFIGURATION ---
 app.use(cors({
-    origin: frontendUrl.trim(), // Use the trimmed value to prevent whitespace issues
+    origin: frontendUrl.trim(),
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
 }));
-// --- END CRITICAL CORS CONFIGURATION ---
+
+// --- Helper Functions (rest of the file is the same) ---
+// ... (rest of the code is identical)
 
 
 // --- Helper Functions ---

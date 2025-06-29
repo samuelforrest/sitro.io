@@ -1,0 +1,25 @@
+# Git
+.git/
+
+# Node
+node_modules/
+.env
+.env.local
+npm-debug.log
+yarn-error.log
+# Yarn
+.yarn/
+.pnp.*
+
+# Next.js
+.next/
+out/
+.vercel/
+
+# VSCode
+.vscode/
+
+# Others
+*.tgz
+*.log
+.DS_Store

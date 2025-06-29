@@ -1,22 +1,22 @@
 // orchestrator/index.js
-require('dotenv').config(); // Load environment variables (locally for testing, but does nothing in Cloud Run)
+require('dotenv').config();
 const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
-const simpleGit = require('simple-git'); // For Git operations
+const simpleGit = require('simple-git');
 const path = require('path');
-const fs = require('fs/promises'); // Use fs.promises for async file operations
-const { randomUUID } = require('crypto'); // For unique IDs
+const fs = require('fs/promises');
+const { randomUUID } = require('crypto');
+const { Buffer } = require('buffer');
 
 const app = express();
 const port = process.env.PORT || 8080;
 
 // --- Environment Variables & Client Initializations ---
-// These read directly from process.env, which is what Cloud Run provides
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // This is the key we're debugging
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 const githubUsername = process.env.GITHUB_USERNAME;
 const githubPat = process.env.GITHUB_PAT;
 const vercelApiToken = process.env.VERCEL_API_TOKEN;
@@ -26,18 +26,16 @@ const boilerplateRepoUrl = process.env.BOILERPLATE_REPO_URL;
 const boilerplateRepoBranch = process.env.BOILERPLATE_REPO_BRANCH || 'main';
 const frontendUrl = process.env.FRONTEND_URL;
 
-// --- STARTUP LOGGING FOR DEBUGGING ---
+// --- STARTUP LOGGING ---
 console.log('Orchestrator Startup Diagnostics:');
 console.log(`  PORT: ${port}`);
 console.log(`  GEMINI_API_KEY_LOADED: ${!!geminiApiKey}`);
 console.log(`  SUPABASE_URL_LOADED: ${!!supabaseUrl}`);
-// >>>>>>> ADDED EXTREME SUPABASE KEY DEBUGGING <<<<<<<
 console.log(`  SUPABASE_SERVICE_KEY (RAW): '${process.env.SUPABASE_SERVICE_KEY}'`);
 console.log(`  SUPABASE_SERVICE_KEY (LENGTH): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY.length : 'N/A'}`);
 console.log(`  SUPABASE_SERVICE_KEY (TRIMMED LENGTH): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY.trim().length : 'N/A'}`);
 console.log(`  SUPABASE_SERVICE_KEY (CHAR 0): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY[0] : 'N/A'}`);
 console.log(`  SUPABASE_SERVICE_KEY (CHAR LAST): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY[process.env.SUPABASE_SERVICE_KEY.length - 1] : 'N/A'}`);
-// >>>>>>> END EXTREME SUPABASE KEY DEBUGGING <<<<<<<
 console.log(`  GITHUB_USERNAME_LOADED: ${!!githubUsername}`);
 console.log(`  VERCEL_API_TOKEN_LOADED: ${!!vercelApiToken}`);
 console.log(`  VERCEL_DOMAIN_LOADED: ${!!vercelDomain}`);
@@ -49,7 +47,6 @@ console.log(`  FRONTEND_URL (TRIMMED for CORS): '${frontendUrl ? frontendUrl.tri
 // Validate essential environment variables
 if (!geminiApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !githubPat || !vercelApiToken || !vercelDomain || !boilerplateRepoUrl || !frontendUrl) {
     console.error("CRITICAL ERROR: One or more essential environment variables are missing or undefined!");
-    console.error("  Missing/Undefined variables details:");
     if (!geminiApiKey) console.error("    - GEMINI_API_KEY");
     if (!supabaseUrl) console.error("    - SUPABASE_URL");
     if (!supabaseServiceKey) console.error("    - SUPABASE_SERVICE_KEY");
@@ -59,7 +56,7 @@ if (!geminiApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !
     if (!vercelDomain) console.error("    - VERCEL_DOMAIN");
     if (!boilerplateRepoUrl) console.error("    - BOILERPLATE_REPO_URL");
     if (!frontendUrl) console.error("    - FRONTEND_URL");
-    process.exit(1); // Force exit if critical variables are missing
+    process.exit(1);
 }
 console.log('All essential environment variables confirmed.');
 console.log(`Orchestrator will allow CORS from: '${frontendUrl.trim()}'`);
@@ -69,19 +66,16 @@ const genAI = new GoogleGenerativeAI(geminiApiKey);
 const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Supabase Client
-// This is the line that's failing with Invalid URL. It's using the raw variable.
-const supabase = createClient(supabaseUrl, supabaseServiceKey); 
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 app.use(express.json());
 app.use(cors({
-    origin: '*', // TEMPORARY DEBUGGING - DO NOT USE IN PRODUCTION
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type'],
+    origin: frontendUrl.trim(),
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
-
-// --- Helper Functions (rest of the file is the same) ---
-// ... (rest of the code is identical)
-
 
 // --- Helper Functions ---
 async function callVercelApi(endpoint, method = 'GET', body = null) {
@@ -92,7 +86,7 @@ async function callVercelApi(endpoint, method = 'GET', body = null) {
     const url = `https://api.vercel.com${endpoint}`;
     console.log(`[Vercel API Call] Method: ${method}, Endpoint: ${url}`);
     if (body) {
-        console.log(`[Vercel API Call] Body: ${JSON.stringify(body).substring(0, 200)}...`); // Log truncated body
+        console.log(`[Vercel API Call] Body: ${JSON.stringify(body).substring(0, 200)}...`);
     }
 
     const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
@@ -104,7 +98,7 @@ async function callVercelApi(endpoint, method = 'GET', body = null) {
         throw new Error(`Vercel API call failed: ${res.statusText} - ${errorText}`);
     }
     const jsonResponse = await res.json();
-    console.log(`[Vercel API Call] Success response: ${JSON.stringify(jsonResponse).substring(0, 200)}...`); // Log truncated response
+    console.log(`[Vercel API Call] Success response: ${JSON.stringify(jsonResponse).substring(0, 200)}...`);
     return jsonResponse;
 }
 
@@ -117,13 +111,13 @@ app.post('/generate-and-deploy', async (req, res) => {
         return res.status(400).json({ error: 'Prompt is required.' });
     }
 
-    const pageId = randomUUID(); // Generate a unique ID for this page
-    const repoSlug = `ai-lp-${pageId.substring(0, 8)}`; // Short unique name for GitHub repo
-    const githubRepoUrl = `https://github.com/${githubUsername}/${repoSlug}.git`;
+    const pageId = randomUUID();
+    const repoSlug = `ai-lp-${pageId.substring(0, 8)}`;
+    let githubRepoUrl = `https://github.com/${githubUsername}/${repoSlug}.git`; // URL for the NEW repo
     let deployedUrl = '';
     let vercelProjectId = '';
     let vercelDeploymentId = '';
-    let generatedCode = ''; // To send back for Sandpack preview
+    let generatedCode = '';
 
     console.log(`[${pageId}] Initiating new generation for prompt: "${prompt.substring(0, 50)}..."`);
 
@@ -134,6 +128,7 @@ app.post('/generate-and-deploy', async (req, res) => {
             prompt: prompt,
             status: 'pending',
             github_repo_url: githubRepoUrl,
+            content: {} // Ensure content is provided, even if empty initially
         }).select().single();
         if (error) throw error;
         console.log(`[${pageId}] Supabase record created. Status: pending.`);
@@ -156,9 +151,8 @@ app.post('/generate-and-deploy', async (req, res) => {
     });
 
     // --- ASYNCHRONOUS GENERATION & DEPLOYMENT PROCESS ---
-    // This entire block runs in the background for Cloud Run, after initial response.
     (async () => {
-        let tempDir; // Declare tempDir here so it's accessible in finally block
+        let tempDir;
         try {
             // Update status in DB
             await supabase.from('generated_pages').update({ status: 'generating_code' }).eq('id', pageId);
@@ -241,46 +235,68 @@ Description for the landing page: "${prompt}"
             console.log(`[${pageId}] Status updated to pushing_code.`);
 
             tempDir = path.join('/tmp', pageId); // Use /tmp for Cloud Run ephemeral storage
-            const localRepoPath = path.join(tempDir, repoSlug);
+            const localRepoPath = path.join(tempDir, repoSlug); // Path to the NEW repo's local clone
 
             try {
-                // Configure git with a higher timeout for clone
-                const git = simpleGit(); // Global instance for clone outside specific repo
-                await fs.mkdir(tempDir, { recursive: true }); // Ensure parent dir exists
+                // Ensure the temp directory for the clone is clean
+                if (await fs.stat(localRepoPath).catch(() => null)) { // Check if path exists
+                    await fs.rm(localRepoPath, { recursive: true, force: true });
+                    console.log(`[${pageId}] Cleaned up existing clone path ${localRepoPath} before new clone.`);
+                }
+                await fs.mkdir(tempDir, { recursive: true }); // Ensure parent temp dir exists
+
+                // Clone boilerplate INTO THE tempDir/repoSlug path
                 console.log(`[${pageId}] Attempting to clone boilerplate from ${boilerplateRepoUrl} to ${localRepoPath}`);
+                const git = simpleGit(); // Use a fresh simpleGit instance for clone
                 await git.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/nextjs-lp-boilerplate.git`, localRepoPath, ['--branch', boilerplateRepoBranch]);
                 console.log(`[${pageId}] Cloned boilerplate successfully.`);
             } catch (cloneErr) {
                 console.error(`[${pageId}] ERROR cloning boilerplate:`, cloneErr.message);
-                // Log git output if available
                 if (cloneErr.stdout) console.error(`[${pageId}] Git stdout (clone):`, cloneErr.stdout.toString());
                 if (cloneErr.stderr) console.error(`[${pageId}] Git stderr (clone):`, cloneErr.stderr.toString());
                 throw new Error(`Failed to clone boilerplate repo: ${cloneErr.message}`);
             }
 
             try {
+                // Configure new repo git instance (operating *within* the cloned repo directory)
+                const newRepoGit = simpleGit({ baseDir: localRepoPath });
+
+                // CRITICAL FIX: Ensure the remote is correct for the PUSH
+                // Remove the old 'origin' (pointing to boilerplate)
+                try {
+                    await newRepoGit.removeRemote('origin');
+                    console.log(`[${pageId}] Removed old 'origin' remote.`);
+                } catch (e) {
+                    console.warn(`[${pageId}] 'origin' remote not found to remove (might be first time or already removed).`);
+                }
+
+                // Add the new 'origin' pointing to the NEWLY CREATED REPO
+                const authenticatedNewRepoUrl = `https://${githubUsername}:${githubPat}@github.com/${githubUsername}/${repoSlug}.git`;
+                await newRepoGit.addRemote('origin', authenticatedNewRepoUrl);
+                console.log(`[${pageId}] Added new 'origin' remote pointing to ${repoSlug}.`);
+
+
                 // Overwrite the main page.tsx with AI-generated code
                 const pageTsxPath = path.join(localRepoPath, 'src', 'app', 'page.tsx');
                 console.log(`[${pageId}] Writing AI-generated code to: ${pageTsxPath}`);
                 await fs.writeFile(pageTsxPath, generatedCode);
                 console.log(`[${pageId}] Injected AI-generated code into page.tsx`);
 
-                // Configure new repo git instance
-                const newRepoGit = simpleGit({ baseDir: localRepoPath });
+                // Configure Git user (important for commit authorship)
                 await newRepoGit.addConfig('user.name', githubUsername);
                 await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
-                await newRepoGit.add('.');
+                await newRepoGit.add('.'); // Stage all changes
                 console.log(`[${pageId}] Added files for commit.`);
                 await newRepoGit.commit('feat: AI generated initial landing page code');
                 console.log(`[${pageId}] Committing to local repo.`);
 
-                console.log(`[${pageId}] Attempting to push code to: ${githubRepoUrl}`);
-                await newRepoGit.push('origin', boilerplateRepoBranch, ['--force']); // --force to overwrite initial boilerplate branch if it was pushed empty
+                // Push with --force to overwrite initial content in the new repo
+                // This push now targets the NEWLY ADDED 'origin' remote
+                await newRepoGit.push('origin', boilerplateRepoBranch, ['--force']);
                 console.log(`[${pageId}] Pushed AI-generated code to new GitHub repo successfully.`);
 
             } catch (pushErr) {
                 console.error(`[${pageId}] ERROR during git push or local file operations:`, pushErr.message);
-                // Log git output if available
                 if (pushErr.stdout) console.error(`[${pageId}] Git stdout (push):`, pushErr.stdout.toString());
                 if (pushErr.stderr) console.error(`[${pageId}] Git stderr (push):`, pushErr.stderr.toString());
                 throw new Error(`Failed to push code to GitHub: ${pushErr.message}`);
@@ -295,13 +311,13 @@ Description for the landing page: "${prompt}"
                 name: repoSlug,
                 gitRepository: {
                     type: 'github',
-                    repo: `${githubUsername}/${repoSlug}`,
+                    repo: `${githubUsername}/${repoSlug}`, // Vercel needs this exact format
                 },
-                installCommand: 'npm install', // Standard Next.js
-                buildCommand: 'npm run build', // Standard Next.js
-                outputDirectory: '.next', // Default for Next.js App Router
+                installCommand: 'npm install',
+                buildCommand: 'npm run build',
+                outputDirectory: '.next',
                 framework: 'nextjs',
-                public: false, // Keep private
+                public: false, // Keep client pages private
             };
 
             console.log(`[${pageId}] Calling Vercel API to create project: ${repoSlug}`);
@@ -314,12 +330,10 @@ Description for the landing page: "${prompt}"
             console.log(`[${pageId}] Vercel Project created with ID: ${vercelProjectId}`);
 
             // 6. Add Custom Domain (Subdomain)
-            const subdomain = repoSlug; // Use the repo name as subdomain for simplicity
+            const subdomain = repoSlug;
             const fullDomain = `${subdomain}.${vercelDomain}`;
 
-            const addDomainBody = {
-                domain: fullDomain,
-            };
+            const addDomainBody = { domain: fullDomain };
 
             console.log(`[${pageId}] Calling Vercel API to add domain: ${fullDomain} to project ${vercelProjectId}`);
             await callVercelApi(
@@ -351,13 +365,12 @@ Description for the landing page: "${prompt}"
                             deployedUrl = `https://${fullDomain}`; // Use the custom domain
                             console.log(`[${pageId}] Deployment READY! Final URL: ${deployedUrl}`);
                         } else {
-                            // If build fails, try to fetch build logs from Vercel to help debug
-                            let buildLogsUrl = `https://vercel.com/${githubUsername}/${repoSlug}/deployments/${latestDeployment.uid}`; // Assuming public project if you want direct link
-                            if (vercelTeamId) {
-                                buildLogsUrl = `https://vercel.com/${vercelTeamId}/${repoSlug}/deployments/${latestDeployment.uid}`;
+                            let buildLogsUrl = `https://vercel.com/${githubUsername}/${repoSlug}/deployments/${latestDeployment.uid}`;
+                            if (vercelTeamId) { // Adjust URL if using Vercel team
+                                buildLogsUrl = `https://vercel.com/${vercelTeamId.split('_')[1] || vercelTeamId}/${repoSlug}/deployments/${latestDeployment.uid}`; // Split for team slug
                             }
-                            console.error(`[${pageId}] Vercel deployment FAILED! Check logs at: ${buildLogsUrl}`);
-                            throw new Error(`Vercel deployment failed with status: ${latestDeployment.state}. See Vercel logs.`);
+                            console.error(`[${pageId}] Vercel deployment FAILED! Status: ${latestDeployment.state}. Check logs at: ${buildLogsUrl}`);
+                            throw new Error(`Vercel deployment failed with status: ${latestDeployment.state}. See Vercel logs: ${buildLogsUrl}`);
                         }
                     }
                 }
@@ -386,7 +399,7 @@ Description for the landing page: "${prompt}"
             }).eq('id', pageId);
         } finally {
             // Clean up temporary directory (important for Cloud Run ephemeral storage)
-            if (tempDir && fs.rm) { // Check if tempDir was created and fs.rm exists
+            if (tempDir && fs.rm) {
                 await fs.rm(tempDir, { recursive: true, force: true }).catch(err => console.error(`[${pageId}] Failed to clean up temp dir ${tempDir}:`, err));
                 console.log(`[${pageId}] Cleaned up temporary directory: ${tempDir}`);
             }
@@ -406,8 +419,8 @@ app.get('/status/:id', async (req, res) => {
             id: data.id,
             status: data.status,
             url: data.deployed_url,
-            message: data.message, // For failed status
-            generated_code: data.generated_code // Send code for Sandpack preview
+            message: data.message,
+            generated_code: data.generated_code
         });
     } catch (dbError) {
         console.error(`[${id}] Supabase status fetch error:`, dbError);

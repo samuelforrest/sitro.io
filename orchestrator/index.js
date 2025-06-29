@@ -1,35 +1,62 @@
 // orchestrator/index.js
-require('dotenv').config();
+require('dotenv').config(); // Load environment variables (locally for testing, but does nothing in Cloud Run)
 const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
-const simpleGit = require('simple-git'); // For Git operations
+const simpleGit = require('simple-git');
 const path = require('path');
-const fs = require('fs/promises'); // Use fs.promises for async file operations
-const { randomUUID } = require('crypto'); // For unique IDs
+const fs = require('fs/promises');
+const { randomUUID } = require('crypto');
 const { Buffer } = require('buffer'); // For Vercel API response parsing
 
 const app = express();
 const port = process.env.PORT || 8080;
 
 // --- Environment Variables & Client Initializations ---
+// These read directly from process.env, which is what Cloud Run provides
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 const githubUsername = process.env.GITHUB_USERNAME;
 const githubPat = process.env.GITHUB_PAT;
 const vercelApiToken = process.env.VERCEL_API_TOKEN;
-const vercelTeamId = process.env.VERCEL_TEAM_ID; // Optional
+const vercelTeamId = process.env.VERCEL_TEAM_ID;
 const vercelDomain = process.env.VERCEL_DOMAIN;
 const boilerplateRepoUrl = process.env.BOILERPLATE_REPO_URL;
 const boilerplateRepoBranch = process.env.BOILERPLATE_REPO_BRANCH || 'main';
+const frontendUrl = process.env.FRONTEND_URL; // Explicitly get FRONTEND_URL here
+
+// --- ADDED LOGGING FOR DEBUGGING ---
+console.log('Orchestrator Startup Diagnostics:');
+console.log(`  PORT: ${port}`);
+console.log(`  GEMINI_API_KEY_LOADED: ${!!geminiApiKey}`);
+console.log(`  SUPABASE_URL_LOADED: ${!!supabaseUrl}`);
+console.log(`  GITHUB_USERNAME_LOADED: ${!!githubUsername}`);
+console.log(`  VERCEL_API_TOKEN_LOADED: ${!!vercelApiToken}`);
+console.log(`  VERCEL_DOMAIN_LOADED: ${!!vercelDomain}`);
+console.log(`  BOILERPLATE_REPO_URL_LOADED: ${!!boilerplateRepoUrl}`);
+console.log(`  FRONTEND_URL (RAW from process.env): '${process.env.FRONTEND_URL}'`); // Raw value
+console.log(`  FRONTEND_URL (TRIMMED for CORS): '${frontendUrl ? frontendUrl.trim() : 'undefined/null'}'`); // Trimmed value
+// --- END ADDED LOGGING ---
 
 // Validate essential environment variables
-if (!geminiApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !githubPat || !vercelApiToken || !vercelDomain || !boilerplateRepoUrl) {
-    console.error("Missing essential environment variables!");
-    process.exit(1);
+if (!geminiApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !githubPat || !vercelApiToken || !vercelDomain || !boilerplateRepoUrl || !frontendUrl) {
+    console.error("CRITICAL ERROR: One or more essential environment variables are missing or undefined!");
+    console.error("  Missing/Undefined variables details:");
+    if (!geminiApiKey) console.error("    - GEMINI_API_KEY");
+    if (!supabaseUrl) console.error("    - SUPABASE_URL");
+    if (!supabaseServiceKey) console.error("    - SUPABASE_SERVICE_KEY");
+    if (!githubUsername) console.error("    - GITHUB_USERNAME");
+    if (!githubPat) console.error("    - GITHUB_PAT");
+    if (!vercelApiToken) console.error("    - VERCEL_API_TOKEN");
+    if (!vercelDomain) console.error("    - VERCEL_DOMAIN");
+    if (!boilerplateRepoUrl) console.error("    - BOILERPLATE_REPO_URL");
+    if (!frontendUrl) console.error("    - FRONTEND_URL");
+    process.exit(1); // Force exit if critical variables are missing
 }
+console.log('All essential environment variables confirmed.');
+console.log(`Orchestrator will allow CORS from: '${frontendUrl.trim()}'`); // Log the trimmed value that will be used for CORS
 
 // Google Gemini
 const genAI = new GoogleGenerativeAI(geminiApiKey);
@@ -39,13 +66,17 @@ const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 app.use(express.json());
+
+// --- CRITICAL CORS CONFIGURATION ---
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Allow requests from your frontend
+    origin: frontendUrl.trim(), // Use the trimmed value to prevent whitespace issues
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
 }));
+// --- END CRITICAL CORS CONFIGURATION ---
 
-// --- Helper Functions ---
 
-// Simplified fetch for Vercel API that handles streaming body response
+// --- Helper Functions (same as before) ---
 async function callVercelApi(endpoint, method = 'GET', body = null) {
     const headers = {
         'Authorization': `Bearer ${vercelApiToken}`,
@@ -64,7 +95,7 @@ async function callVercelApi(endpoint, method = 'GET', body = null) {
         console.error('Vercel Response Body:', errorText);
         throw new Error(`Vercel API call failed: ${res.statusText} - ${errorText}`);
     }
-    return res.json(); // Use .json() directly as Vercel APIs usually return JSON
+    return res.json();
 }
 
 // --- API Endpoints ---
@@ -77,7 +108,7 @@ app.post('/generate-and-deploy', async (req, res) => {
     }
 
     const pageId = randomUUID(); // Generate a unique ID for this page
-    const repoSlug = `ai-lp-${pageId.substring(0, 8)}`; // Short unique name for GitHub repo and Vercel project
+    const repoSlug = `ai-lp-${pageId.substring(0, 8)}`; // Short unique name for GitHub repo
     const githubRepoUrl = `https://github.com/${githubUsername}/${repoSlug}.git`;
     let deployedUrl = '';
     let vercelProjectId = '';
@@ -93,10 +124,9 @@ app.post('/generate-and-deploy', async (req, res) => {
             github_repo_url: githubRepoUrl,
         }).select().single();
         if (error) throw error;
-        // pageId is now confirmed from DB, if gen_random_uuid() was used
     } catch (dbError) {
         console.error('Supabase initial insert error:', dbError);
-        return res.status(500).json({ error: 'Could not create project record in database.' });
+        return res.status(500).json({ error: 'Could not create project record.' });
     }
 
     // Immediately respond to frontend with initial status and ID,
@@ -113,7 +143,6 @@ app.post('/generate-and-deploy', async (req, res) => {
     });
 
     // --- ASYNCHRONOUS GENERATION & DEPLOYMENT PROCESS ---
-    // This entire block runs in the background for Cloud Run, after initial response.
     (async () => {
         let tempDir;
         try {
@@ -133,7 +162,7 @@ Include a clear, self-contained structure:
 - A simple call-to-action (CTA) section at the bottom.
 - Include Google Fonts imports (Montserrat for headings, Inter for body) via <link> tags in the component's render method, or in comments where they should be added in the HTML head if you prefer external loading.
 - Use a coherent color palette based on the prompt (e.g., background, text, primary accent, secondary accent). Use Tailwind's default colors or extend them in comments within the JSX.
-- Include placeholder content that matches the prompt's theme but is diverse.
+- Include placeholder content that matches the prompt but ensure it's diverse.
 - Implement subtle animations (e.g., fade-in on scroll) using simple Tailwind classes if possible (e.g., animate-fade-in) or basic CSS transitions if necessary (but prefer Tailwind).
 
 Do NOT include any external imports beyond 'react'.

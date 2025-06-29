@@ -23,3 +23,6 @@ out/
 *.tgz
 *.log
 .DS_Store
+
+# Google Cloud Credentials
+orchestrator/google-credentials.json

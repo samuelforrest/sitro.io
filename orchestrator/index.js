@@ -74,7 +74,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 app.use(express.json());
 app.use(cors({
-    origin: frontendUrl.trim(),
+    origin: '*', // TEMPORARY DEBUGGING - DO NOT USE IN PRODUCTION
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
 }));

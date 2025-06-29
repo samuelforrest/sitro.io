@@ -426,7 +426,7 @@ Description for the landing page: "${prompt}"
     })();
 });
 
-// Endpoint to check deployment status (polled by frontend)
+// Endpoint to check deployment status (polled by frontend h)
 app.get('/status/:id', async (req, res) => {
     const { id } = req.params;
     try {

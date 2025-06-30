@@ -68,7 +68,7 @@ console.log(`Orchestrator will allow CORS from: '${frontendUrl.trim()}'`);
 
 // Google Gemini
 const genAI = new GoogleGenerativeAI(geminiApiKey);
-const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // Supabase Client
 // This is the line that's failing with Invalid URL. It's using the raw variable.

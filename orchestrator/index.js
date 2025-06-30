@@ -80,10 +80,6 @@ app.use(cors({
     allowedHeaders: ['Content-Type'],
 }));
 
-// --- Helper Functions (rest of the file is the same) ---
-// ... (rest of the code is identical)
-
-
 // --- Helper Functions ---
 async function callVercelApi(endpoint, method = 'GET', body = null) {
     const headers = {
@@ -107,6 +103,28 @@ async function callVercelApi(endpoint, method = 'GET', body = null) {
     const jsonResponse = await res.json();
     console.log(`[Vercel API Call] Success response: ${JSON.stringify(jsonResponse).substring(0, 200)}...`); // Log truncated response
     return jsonResponse;
+}
+
+// Helper function to copy directory recursively
+async function copyDir(src, dest) {
+    await fs.mkdir(dest, { recursive: true });
+    const entries = await fs.readdir(src, { withFileTypes: true });
+    
+    for (let entry of entries) {
+        const srcPath = path.join(src, entry.name);
+        const destPath = path.join(dest, entry.name);
+        
+        // Skip .git directory to avoid copying git history
+        if (entry.name === '.git') {
+            continue;
+        }
+        
+        if (entry.isDirectory()) {
+            await copyDir(srcPath, destPath);
+        } else {
+            await fs.copyFile(srcPath, destPath);
+        }
+    }
 }
 
 // --- API Endpoints ---
@@ -206,14 +224,14 @@ Description for the landing page: "${prompt}"
             }).eq('id', pageId);
             console.log(`[${pageId}] Code generated and saved to DB. Length: ${generatedCode.length} chars.`);
 
-
-            // 3. Create GitHub Repo
+            // 3. Create GitHub Repo (BLANK)
             await supabase.from('generated_pages').update({ status: 'creating_repo' }).eq('id', pageId);
             console.log(`[${pageId}] Status updated to creating_repo.`);
             const createRepoBody = {
                 name: repoSlug,
                 private: true, // Keep client pages private
                 description: `AI Generated Landing Page for prompt: "${prompt.substring(0, Math.min(prompt.length, 100))}"`,
+                auto_init: false, // IMPORTANT: Don't auto-initialize with README, we want it completely blank
             };
             try {
                 const githubResponse = await fetch(`https://api.github.com/user/repos`, {
@@ -230,63 +248,68 @@ Description for the landing page: "${prompt}"
                     console.error(`[${pageId}] ERROR: GitHub repo creation failed: ${githubResponse.status} - ${githubErrorText}`);
                     throw new Error(`GitHub repo creation failed: ${githubResponse.status} - ${githubErrorText}`);
                 }
-                console.log(`[${pageId}] GitHub repo created: ${repoSlug}`);
+                console.log(`[${pageId}] GitHub blank repo created: ${repoSlug}`);
             } catch (githubErr) {
                 console.error(`[${pageId}] ERROR creating GitHub repo (network/API call issue):`, githubErr.message);
                 throw new Error(`Failed to create GitHub repo: ${githubErr.message}`);
             }
 
-
-            // 4. Clone Boilerplate, Inject Code, Push to new Repo
+            // 4. Clone Boilerplate, Copy to New Repo, Inject Code, Push to New Repo
             await supabase.from('generated_pages').update({ status: 'pushing_code' }).eq('id', pageId);
             console.log(`[${pageId}] Status updated to pushing_code.`);
 
             tempDir = path.join('/tmp', pageId); // Use /tmp for Cloud Run ephemeral storage
-            const localRepoPath = path.join(tempDir, repoSlug);
+            const boilerplatePath = path.join(tempDir, 'boilerplate');
+            const newRepoPath = path.join(tempDir, repoSlug);
 
             try {
-                // Configure git with a higher timeout for clone
-                const git = simpleGit(); // Global instance for clone outside specific repo
                 await fs.mkdir(tempDir, { recursive: true }); // Ensure parent dir exists
-                console.log(`[${pageId}] Attempting to clone boilerplate from ${boilerplateRepoUrl} to ${localRepoPath}`);
-                await git.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/nextjs-lp-boilerplate.git`, localRepoPath, ['--branch', boilerplateRepoBranch]);
+                
+                // Step 1: Clone boilerplate to temporary location
+                const git = simpleGit();
+                console.log(`[${pageId}] Cloning boilerplate from ${boilerplateRepoUrl} to ${boilerplatePath}`);
+                await git.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/nextjs-lp-boilerplate.git`, boilerplatePath, ['--branch', boilerplateRepoBranch]);
                 console.log(`[${pageId}] Cloned boilerplate successfully.`);
-            } catch (cloneErr) {
-                console.error(`[${pageId}] ERROR cloning boilerplate:`, cloneErr.message);
-                // Log git output if available
-                if (cloneErr.stdout) console.error(`[${pageId}] Git stdout (clone):`, cloneErr.stdout.toString());
-                if (cloneErr.stderr) console.error(`[${pageId}] Git stderr (clone):`, cloneErr.stderr.toString());
-                throw new Error(`Failed to clone boilerplate repo: ${cloneErr.message}`);
-            }
-
-            try {
-                // Overwrite the main page.tsx with AI-generated code
-                const pageTsxPath = path.join(localRepoPath, 'src', 'app', 'page.tsx');
+                
+                // Step 2: Initialize new empty repo
+                console.log(`[${pageId}] Initializing new repo at ${newRepoPath}`);
+                await fs.mkdir(newRepoPath, { recursive: true });
+                const newRepoGit = simpleGit({ baseDir: newRepoPath });
+                await newRepoGit.init();
+                await newRepoGit.addConfig('user.name', githubUsername);
+                await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
+                
+                // Step 3: Copy boilerplate files to new repo (excluding .git)
+                console.log(`[${pageId}] Copying boilerplate files to new repo`);
+                await copyDir(boilerplatePath, newRepoPath);
+                
+                // Step 4: Overwrite the main page.tsx with AI-generated code
+                const pageTsxPath = path.join(newRepoPath, 'src', 'app', 'page.tsx');
                 console.log(`[${pageId}] Writing AI-generated code to: ${pageTsxPath}`);
                 await fs.writeFile(pageTsxPath, generatedCode);
                 console.log(`[${pageId}] Injected AI-generated code into page.tsx`);
 
-                // Configure new repo git instance
-                const newRepoGit = simpleGit({ baseDir: localRepoPath });
-                await newRepoGit.addConfig('user.name', githubUsername);
-                await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
+                // Step 5: Add remote origin and push
+                console.log(`[${pageId}] Adding remote origin: ${githubRepoUrl}`);
+                await newRepoGit.addRemote('origin', `https://${githubUsername}:${githubPat}@github.com/${githubUsername}/${repoSlug}.git`);
+                
                 await newRepoGit.add('.');
                 console.log(`[${pageId}] Added files for commit.`);
+                
                 await newRepoGit.commit('feat: AI generated initial landing page code');
-                console.log(`[${pageId}] Committing to local repo.`);
+                console.log(`[${pageId}] Committed to local repo.`);
 
-                console.log(`[${pageId}] Attempting to push code to: ${githubRepoUrl}`);
-                await newRepoGit.push('origin', boilerplateRepoBranch, ['--force']); // --force to overwrite initial boilerplate branch if it was pushed empty
+                console.log(`[${pageId}] Pushing code to new GitHub repo: ${githubRepoUrl}`);
+                await newRepoGit.push('origin', boilerplateRepoBranch);
                 console.log(`[${pageId}] Pushed AI-generated code to new GitHub repo successfully.`);
 
-            } catch (pushErr) {
-                console.error(`[${pageId}] ERROR during git push or local file operations:`, pushErr.message);
+            } catch (repoErr) {
+                console.error(`[${pageId}] ERROR during repo setup or git operations:`, repoErr.message);
                 // Log git output if available
-                if (pushErr.stdout) console.error(`[${pageId}] Git stdout (push):`, pushErr.stdout.toString());
-                if (pushErr.stderr) console.error(`[${pageId}] Git stderr (push):`, pushErr.stderr.toString());
-                throw new Error(`Failed to push code to GitHub: ${pushErr.message}`);
+                if (repoErr.stdout) console.error(`[${pageId}] Git stdout:`, repoErr.stdout.toString());
+                if (repoErr.stderr) console.error(`[${pageId}] Git stderr:`, repoErr.stderr.toString());
+                throw new Error(`Failed to setup repo and push code: ${repoErr.message}`);
             }
-
 
             // 5. Create Vercel Project & Trigger Deployment
             await supabase.from('generated_pages').update({ status: 'deploying' }).eq('id', pageId);

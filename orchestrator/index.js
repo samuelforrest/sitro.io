@@ -374,11 +374,18 @@ Description for the landing page: "${prompt}"
             );
             console.log(`[${pageId}] Added custom domain: ${fullDomain}`);
 
+            // 6. Add Custom Domain (Subdomain)
+            // ... (existing code for adding domain)
             console.log(`[${pageId}] Added custom domain: ${fullDomain}`);
 
-            // >>>>> FIX START (Programmatic Commit to Trigger Vercel) <<<<<
+            // >>>>> FIX START (Programmatic Commit to Trigger Vercel - with delay) <<<<<
             // Vercel requires a new commit to trigger a build after project creation and domain adding.
             // We'll perform a small, innocuous commit to the newly created repo.
+
+            console.log(`[${pageId}] Delaying final commit to ensure Vercel repo indexing...`);
+            // Add a short delay (e.g., 5 seconds) to give Vercel time to register the new repo's first commit
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 7 seconds - change later
+
             console.log(`[${pageId}] Performing a final commit to trigger Vercel deployment...`);
             
             // Get the git instance for the new client repo

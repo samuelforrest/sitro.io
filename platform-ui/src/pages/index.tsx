@@ -165,7 +165,7 @@ export default function HomePage() {
 
       <main style={styles.main}>
         <h1 style={styles.title}>
-          Your <span style={styles.gradientText}>AI Page Factory</span>
+          Your <span style={styles.gradientText}>Landing Page Gen</span>
         </h1>
         <p style={styles.description}>
           WARNING TO ALL USERS: DO NOT USE THIS WEBSITE WITHOUT EXPLICIT PERMISSION FROM OWNER. THIS WEBSITE IS DANGEROUS.

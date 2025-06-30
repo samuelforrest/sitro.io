@@ -194,20 +194,21 @@ Generate a single React TypeScript functional component for a landing page based
 The component should be named 'LandingPage' and exported as default.
 It must use Tailwind CSS utility classes directly within the JSX for all styling. Do NOT use inline style objects or separate CSS files.
 The page should be fully responsive using Tailwind's responsive prefixes (e.g., md:text-lg, lg:flex).
-Include a clear, self-contained structure:
-- A prominent hero section (with a headline, tagline, and a CTA button).
-- At least 3 distinct feature sections/cards.
-- A testimonials section (with 2-3 testimonials, each having a quote and author).
-- A simple call-to-action (CTA) section at the bottom.
-- Include Google Fonts imports (Montserrat for headings, Inter for body) via <link> tags in the component's render method, or in comments where they should be added in the HTML head if you prefer external loading.
-- Use a coherent color palette based on the prompt (e.g., background, text, primary accent, secondary accent). Use Tailwind's default colors or extend them in comments within the JSX.
-- Include placeholder content that matches the prompt but ensure it's diverse.
-- Implement subtle animations (e.g., fade-in on scroll) using simple Tailwind classes if possible (e.g., animate-fade-in) or basic CSS transitions if necessary (but prefer Tailwind).
+
+Create a visually appealing and highly functional landing page.
+Incorporate a **diverse set of common landing page sections relevant to the business description provided**. This may include, but is not limited to: a hero section, features/services, about us, testimonials, pricing plans, contact form, or a call-to-action section. Ensure each section is distinct, well-designed, and flows logically.
+
+Utilize **advanced Tailwind CSS features** where appropriate (e.g., gradients, custom shadows, hover effects, transition utilities, responsive grid/flex layouts for all breakpoints).
+Implement **subtle, visually engaging animations** using Tailwind's animate- utilities (e.g., animate-fade-in, animate-slide-in) or basic CSS transitions where appropriate.
+
+Generate **detailed and engaging placeholder content** that perfectly matches the business's theme and appeals to its target audience.
+If specific Google Fonts are requested in the description, include their <link> tags in the component's render method (e.g., right after <body> or in <head> if possible within a single component). Otherwise, use system defaults or common web-safe fonts.
+Use a **coherent color palette** based on the prompt's theme. Prefer Tailwind's default colors, but you can suggest extending Tailwind's theme.extend.colors in comments within the JSX if a specific custom color (e.g., an exact hex code) is essential for the brand.
 
 Do NOT include any external imports beyond 'react'.
 Do NOT include 'tailwind.config.js' or <script src="https://cdn.tailwindcss.com"></script> within the generated component code. These will be provided by the boilerplate project.
 Ensure all JSX is valid and all TypeScript types (like React.FC) are correctly used.
-Output ONLY the TypeScript React component code, starting directly with 'import React from "react";' and ending with 'export default LandingPage;'. Do not include any surrounding markdown like \`\`\`tsx or any extra conversational text.
+Output ONLY the complete TypeScript React component code, starting directly with 'import React from "react";' and ending with 'export default LandingPage;'. Do not include any surrounding markdown like \`\`\`tsx or any extra conversational text.
 
 Description for the landing page: "${prompt}"
 `;

@@ -344,7 +344,7 @@ Description for the landing page: "${prompt}"
                 buildCommand: 'npm run build', // Standard Next.js
                 outputDirectory: '.next', // Default for Next.js App Router
                 framework: 'nextjs',
-                public: false, // Keep private
+                // public: false, // REMOVE THIS LINE ENTIRELY
             };
 
             console.log(`[${pageId}] Calling Vercel API to create project: ${repoSlug}`);

@@ -273,44 +273,55 @@ Description for the landing page: "${prompt}"
                 }
                 await fs.mkdir(tempDir, { recursive: true });
 
-                // 2. Clone boilerplate to a *separate* temporary directory
-                console.log(`[${pageId}] Attempting to clone boilerplate from ${boilerplateRepoUrl} to ${boilerplateClonePath}`);
-                const git = simpleGit(); // Use a fresh simpleGit instance for cloning
-                await git.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/nextjs-lp-boilerplate.git`, boilerplateClonePath, ['--branch', boilerplateRepoBranch]);
+                // >>>>> FIX START <<<<<
+                // Step 1: Clone boilerplate into a *temporary, isolated* directory
+                console.log(`[${pageId}] Cloning boilerplate from ${boilerplateRepoUrl} to ${boilerplateClonePath}`);
+                const gitForInitialClone = simpleGit(); // Use a dedicated git instance for just cloning
+                await gitForInitialClone.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/nextjs-lp-boilerplate.git`, boilerplateClonePath, ['--branch', boilerplateRepoBranch]);
                 console.log(`[${pageId}] Cloned boilerplate successfully into ${boilerplateClonePath}.`);
 
-                // 3. Initialize a *Brand New, Empty Git Repository* in the client's final repo directory
-                console.log(`[${pageId}] Initializing new empty git repo at ${newClientRepoPath}`);
-                await fs.mkdir(newClientRepoPath, { recursive: true }); // Create directory for the new repo
+                // Step 2: Delete the .git folder from the cloned boilerplate
+                const dotGitPath = path.join(boilerplateClonePath, '.git');
+                if (await fs.stat(dotGitPath).catch(() => null)) { // Check if .git exists
+                    await fs.rm(dotGitPath, { recursive: true, force: true });
+                    console.log(`[${pageId}] Removed .git folder from cloned boilerplate.`);
+                }
+                
+                // Step 3: Copy the ENTIRE clean boilerplate content to the new client repo's target directory
+                // This 'newClientRepoPath' will then be the base for our NEW git repo.
+                console.log(`[${pageId}] Copying boilerplate content from ${boilerplateClonePath} to ${newClientRepoPath}`);
+                await copyDir(boilerplateClonePath, newClientRepoPath); // Use the helper to copy everything
+                console.log(`[${pageId}] Boilerplate content copied to new repo directory.`);
+
+                // Step 4: Initialize a *Brand New, Empty Git Repository* in the new client repo's directory
+                // IMPORTANT: This git init happens *after* the content is in place.
+                console.log(`[${pageId}] Initializing new git repo at ${newClientRepoPath}`);
                 const newRepoGit = simpleGit({ baseDir: newClientRepoPath });
                 await newRepoGit.init();
                 await newRepoGit.addConfig('user.name', githubUsername);
                 await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
                 
-                // 4. Copy the *contents* of the cloned boilerplate into the new repo (excluding .git)
-                console.log(`[${pageId}] Copying boilerplate files from ${boilerplateClonePath} to ${newClientRepoPath} (excluding .git)`);
-                await copyDir(boilerplateClonePath, newClientRepoPath); // Helper function copies contents
-                
-                // 5. Overwrite the main page.tsx with AI-generated code inside the NEW client repo
+                // Step 5: Overwrite the main page.tsx with AI-generated code inside the NEW client repo
                 const pageTsxPath = path.join(newClientRepoPath, 'src', 'app', 'page.tsx');
                 console.log(`[${pageId}] Writing AI-generated code to: ${pageTsxPath}`);
                 await fs.writeFile(pageTsxPath, generatedCode);
                 console.log(`[${pageId}] Injected AI-generated code into page.tsx.`);
 
-                // 6. Add remote origin and push from the NEWLY INITIALIZED REPO
+                // Step 6: Add all files to the new repo's staging area and commit
+                await newRepoGit.add('.'); // Stage ALL files in the new repo
+                console.log(`[${pageId}] Added files for commit.`);
+                await newRepoGit.commit('feat: AI generated initial landing page code');
+                console.log(`[${pageId}] Committed to new repo.`);
+
+                // Step 7: Add remote origin and push from the NEWLY INITIALIZED REPO
                 const authenticatedNewRepoUrl = `https://${githubUsername}:${githubPat}@github.com/${githubUsername}/${repoSlug}.git`;
                 await newRepoGit.addRemote('origin', authenticatedNewRepoUrl);
                 console.log(`[${pageId}] Added new 'origin' remote pointing to ${repoSlug}.`);
                 
-                await newRepoGit.add('.'); // Stage all changes in the new repo
-                console.log(`[${pageId}] Added files for commit.`);
-                
-                await newRepoGit.commit('feat: AI generated initial landing page code');
-                console.log(`[${pageId}] Committing to local repo.`);
-
                 console.log(`[${pageId}] Attempting to push code to: ${authenticatedNewRepoUrl}`);
-                await newRepoGit.push('origin', boilerplateRepoBranch); // Removed --force, as it's a first push to empty repo
+                await newRepoGit.push('origin', boilerplateRepoBranch); // Push to the new repo's 'main' branch
                 console.log(`[${pageId}] Pushed AI-generated code to new GitHub repo successfully.`);
+                // >>>>> FIX END <<<<<
 
             } catch (gitOpErr) {
                 console.error(`[${pageId}] ERROR during repo setup or git operations:`, gitOpErr.message);

@@ -362,6 +362,7 @@ Description for the landing page: "${prompt}"
 
             const addDomainBody = {
                 domain: fullDomain,
+                name: fullDomain, // <-- CRITICAL FIX: Add the 'name' property, which is the domain itself
             };
 
             console.log(`[${pageId}] Calling Vercel API to add domain: ${fullDomain} to project ${vercelProjectId}`);

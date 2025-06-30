@@ -168,7 +168,7 @@ export default function HomePage() {
           Your <span style={styles.gradientText}>AI Page Factory</span>
         </h1>
         <p style={styles.description}>
-          Describe your business, desired style, and content. We&apos;ll craft the React/TypeScript code and deploy it to a unique URL.
+          WARNING TO ALL USERS: DO NOT USE THIS WEBSITE WITHOUT EXPLICIT PERMISSION FROM OWNER. THIS WEBSITE IS DANGEROUS.
         </p>
 
         <form onSubmit={handleSubmit} style={styles.form}>

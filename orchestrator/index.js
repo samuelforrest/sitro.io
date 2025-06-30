@@ -203,6 +203,12 @@ Incorporate a **diverse set of common landing page sections relevant to the busi
 Utilize **advanced Tailwind CSS features** where appropriate (e.g., gradients, custom shadows, hover effects, transition utilities, responsive grid/flex layouts for all breakpoints).
 Implement **subtle, visually engaging animations** using Tailwind's animate- utilities (e.g., animate-fade-in, animate-slide-in) or basic CSS transitions where appropriate.
 
+**Overall Design Principles (Very Important - Apply Consistently):**
+- **Consistent Spacing:** Use px- and py- on sections and inner containers to create generous and consistent padding. Use mx-auto and max-w-Xxl on main content containers within sections. Ensure consistent vertical margins (mb-) between elements.
+- **Visual Separation:** Use appropriate py- values for sections to create clear visual breaks. Consider subtle background color variations between sections (e.g., bg-gray-900 vs bg-gray-950).
+- **Modern Layouts:** Employ grid and flex layouts effectively for complex section arrangements (e.g., multi-column feature grids, horizontally centered elements).
+- **Interactive Elements:** Ensure buttons, cards, and other interactive elements have clear hover states (e.g., hover:bg-, hover:scale-105, hover:shadow-xl, transition duration-300).
+
 Generate **detailed and engaging placeholder content** that perfectly matches the business's theme and appeals to its target audience.
 If specific Google Fonts are requested in the description, include their <link> tags in the component's render method (e.g., right after <body> or in <head> if possible within a single component). Otherwise, use system defaults or common web-safe fonts.
 Use a **coherent color palette** based on the prompt's theme. Prefer Tailwind's default colors, but you can suggest extending Tailwind's theme.extend.colors in comments within the JSX if a specific custom color (e.g., an exact hex code) is essential for the brand.

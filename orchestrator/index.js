@@ -1,5 +1,5 @@
 // orchestrator/index.js
-require('dotenv').config(); // Load environment variables (locally for testing, but does nothing in Cloud Run)
+require('dotenv').config();
 const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { createClient } = require('@supabase/supabase-js');
@@ -15,10 +15,8 @@ const port = process.env.PORT || 8080;
 // --- Environment Variables & Client Initializations ---
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // This is the key we're debugging
-// IMPORTANT: Assumed from previous context that supabase (non-admin) client
-// initialized with this service key works for all DB operations as indicated.
-// If not, supabaseAnonKey and supabaseAdmin client must be reintroduced.
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // This is your service_role key
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY; // <-- CRITICAL: Read Anon Key from environment for correct client init
 const githubUsername = process.env.GITHUB_USERNAME;
 const githubPat = process.env.GITHUB_PAT;
 const vercelApiToken = process.env.VERCEL_API_TOKEN;
@@ -33,11 +31,13 @@ console.log('Orchestrator Startup Diagnostics:');
 console.log(`  PORT: ${port}`);
 console.log(`  GEMINI_API_KEY_LOADED: ${!!geminiApiKey}`);
 console.log(`  SUPABASE_URL_LOADED: ${!!supabaseUrl}`);
-console.log(`  SUPABASE_SERVICE_KEY (RAW): '${process.env.SUPABASE_SERVICE_KEY}'`);
-console.log(`  SUPABASE_SERVICE_KEY (LENGTH): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY.length : 'N/A'}`);
-console.log(`  SUPABASE_SERVICE_KEY (TRIMMED LENGTH): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY.trim().length : 'N/A'}`);
-console.log(`  SUPABASE_SERVICE_KEY (CHAR 0): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY[0] : 'N/A'}`);
-console.log(`  SUPABASE_SERVICE_KEY (CHAR LAST): ${process.env.SUPABASE_SERVICE_KEY ? process.env.SUPABASE_SERVICE_KEY[process.env.SUPABASE_SERVICE_KEY.length - 1] : 'N/A'}`);
+console.log(`  SUPABASE_SERVICE_KEY (RAW): '${supabaseServiceKey}'`); // Use the variable directly
+console.log(`  SUPABASE_SERVICE_KEY (LENGTH): ${supabaseServiceKey ? supabaseServiceKey.length : 'N/A'}`);
+console.log(`  SUPABASE_SERVICE_KEY (TRIMMED LENGTH): ${supabaseServiceKey ? supabaseServiceKey.trim().length : 'N/A'}`);
+console.log(`  SUPABASE_SERVICE_KEY (CHAR 0): ${supabaseServiceKey ? supabaseServiceKey[0] : 'N/A'}`);
+console.log(`  SUPABASE_SERVICE_KEY (CHAR LAST): ${supabaseServiceKey ? supabaseServiceKey[supabaseServiceKey.length - 1] : 'N/A'}`);
+console.log(`  SUPABASE_ANON_KEY (RAW): '${supabaseAnonKey}'`); // Log Anon Key
+console.log(`  SUPABASE_ANON_KEY (LENGTH): ${supabaseAnonKey ? supabaseAnonKey.length : 'N/A'}`);
 console.log(`  GITHUB_USERNAME_LOADED: ${!!githubUsername}`);
 console.log(`  GITHUB_PAT_LOADED: ${!!githubPat}`);
 console.log(`  VERCEL_API_TOKEN_LOADED: ${!!vercelApiToken}`);
@@ -47,19 +47,20 @@ console.log(`  FRONTEND_URL (RAW from process.env): '${process.env.FRONTEND_URL}
 console.log(`  FRONTEND_URL (TRIMMED for CORS): '${frontendUrl ? frontendUrl.trim() : 'undefined/null'}'`);
 // --- END STARTUP LOGGING ---
 
-// Validate essential environment variables
-if (!geminiApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !githubPat || !vercelApiToken || !vercelDomain || !boilerplateRepoUrl || !frontendUrl) {
+// Validate essential environment variables (all are now checked correctly, including Anon Key)
+if (!geminiApiKey || !supabaseUrl || !supabaseServiceKey || !supabaseAnonKey || !githubUsername || !githubPat || !vercelApiToken || !vercelDomain || !boilerplateRepoUrl || !frontendUrl) {
     console.error("CRITICAL ERROR: One or more essential environment variables are missing or undefined!");
-    if (!geminiApiKey) console.error("    - GEMINI_API_KEY");
-    if (!supabaseUrl) console.error("    - SUPABASE_URL");
-    if (!supabaseServiceKey) console.error("    - SUPABASE_SERVICE_KEY");
-    if (!githubUsername) console.error("    - GITHUB_USERNAME");
-    if (!githubPat) console.error("    - GITHUB_PAT");
-    if (!vercelApiToken) console.error("    - VERCEL_API_TOKEN");
-    if (!vercelDomain) console.error("    - VERCEL_DOMAIN");
-    if (!boilerplateRepoUrl) console.error("    - BOILERPLATE_REPO_URL");
-    if (!frontendUrl) console.error("    - FRONTEND_URL");
-    process.exit(1); // Force exit if critical variables are missing
+    if (!geminiApiKey) console.error("    - GEMINI_API_KEY is missing.");
+    if (!supabaseUrl) console.error("    - SUPABASE_URL is missing.");
+    if (!supabaseServiceKey) console.error("    - SUPABASE_SERVICE_KEY is missing.");
+    if (!supabaseAnonKey) console.error("    - SUPABASE_ANON_KEY is missing.");
+    if (!githubUsername) console.error("    - GITHUB_USERNAME is missing.");
+    if (!githubPat) console.error("    - GITHUB_PAT is missing.");
+    if (!vercelApiToken) console.error("    - VERCEL_API_TOKEN is missing.");
+    if (!vercelDomain) console.error("    - VERCEL_DOMAIN is missing.");
+    if (!boilerplateRepoUrl) console.error("    - BOILERPLATE_REPO_URL is missing.");
+    if (!frontendUrl) console.error("    - FRONTEND_URL is missing.");
+    process.exit(1);
 }
 console.log('All essential environment variables confirmed.');
 console.log(`Orchestrator will allow CORS from: '${frontendUrl.trim()}'`);
@@ -68,8 +69,12 @@ console.log(`Orchestrator will allow CORS from: '${frontendUrl.trim()}'`);
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// Supabase Client (Using the configuration that you stated "works")
-const supabase = createClient(supabaseUrl, supabaseServiceKey); 
+// Supabase Clients - THIS IS THE CORE FIX FOR SUPABASE
+// 1. Standard client (for public reads, like /status/:id) - Initialized with ANON key
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// 2. Admin client (for privileged writes) - Initialized with SERVICE_ROLE key
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey); 
 
 // --- CRITICAL: Handle uncaught exceptions and unhandled promise rejections ---
 process.on('uncaughtException', (err) => {
@@ -103,7 +108,7 @@ async function copyDir(src, dest) {
         const srcPath = path.join(src, entry.name);
         const destPath = path.join(dest, entry.name);
         
-        // Skip .git directory if present in the source (from a cloned boilerplate)
+        // Skip .git directory if present in the source, we'll init our own Git repo in dest
         if (entry.name === '.git') {
             continue;
         }
@@ -162,7 +167,7 @@ app.post('/generate-and-deploy', async (req, res) => {
 
     // 1. Initial Supabase record (status: pending)
     try {
-        const { data, error } = await supabase.from('generated_pages').insert({ // Use supabase (the one that "works")
+        const { data, error } = await supabaseAdmin.from('generated_pages').insert({ // Use supabaseAdmin for inserts
             id: pageId,
             prompt: prompt,
             status: 'pending',
@@ -193,11 +198,11 @@ app.post('/generate-and-deploy', async (req, res) => {
     (async () => {
         let tempDir; // Root temp dir for this generation
         let boilerplateClonePath; // Path where boilerplate is temporarily cloned
-        let clientRepoContentsPath;   // Path where the new client repo's files will reside (also the baseDir for newRepoGit)
+        let newClientRepoPath;   // Path where the new client repo will be assembled
 
         try {
             // Update status in DB
-            await supabase.from('generated_pages').update({ status: 'generating_code' }).eq('id', pageId); // Use supabase
+            await supabaseAdmin.from('generated_pages').update({ status: 'generating_code' }).eq('id', pageId); // Correct: Use supabaseAdmin here
             console.log(`[${pageId}] Status updated to generating_code.`);
 
             // 2. Generate React/TS/Tailwind Code with Gemini
@@ -235,7 +240,7 @@ Description for the landing page: "${prompt}"
             }
 
             // Update DB with generated code for Sandpack preview
-            await supabase.from('generated_pages').update({ // Use supabase for updates
+            await supabaseAdmin.from('generated_pages').update({ // CORRECT: Use supabaseAdmin for updates
                 status: 'code_generated',
                 generated_code: generatedCode
             }).eq('id', pageId);
@@ -243,7 +248,7 @@ Description for the landing page: "${prompt}"
 
 
             // 3. Create GitHub Repo (BLANK)
-            await supabase.from('generated_pages').update({ status: 'creating_repo' }).eq('id', pageId);
+            await supabaseAdmin.from('generated_pages').update({ status: 'creating_repo' }).eq('id', pageId);
             console.log(`[${pageId}] Status updated to creating_repo.`);
             const createRepoBody = {
                 name: repoSlug,
@@ -274,7 +279,7 @@ Description for the landing page: "${prompt}"
 
 
             // 4. Prepare and Push to New GitHub Repo - THE CORE FIX!
-            await supabase.from('generated_pages').update({ status: 'pushing_code' }).eq('id', pageId);
+            await supabaseAdmin.from('generated_pages').update({ status: 'pushing_code' }).eq('id', pageId);
             console.log(`[${pageId}] Status updated to pushing_code.`);
 
             tempDir = path.join('/tmp', pageId); // Root temp dir for this generation
@@ -296,10 +301,10 @@ Description for the landing page: "${prompt}"
                 console.log(`[${pageId}] Cloned boilerplate successfully into ${boilerplateClonePath}.`);
 
                 // 3. Initialize a *Brand New, Empty Git Repository* in the client's final repo directory
-                console.log(`[${pageId}] Initializing new empty git repo at ${newRepoWorkingPath}`);
-                await fs.mkdir(newRepoWorkingPath, { recursive: true }); // Create directory for the new repo
-                const newRepoGit = simpleGit({ baseDir: newRepoWorkingPath });
-                await newRepoGit.init(); // Initialize the new repo here
+                console.log(`[${pageId}] Initializing new empty git repo at ${newClientRepoPath}`);
+                await fs.mkdir(newClientRepoPath, { recursive: true }); // Create directory for the new repo
+                const newRepoGit = simpleGit({ baseDir: newClientRepoPath });
+                await newRepoGit.init();
                 await newRepoGit.addConfig('user.name', githubUsername);
                 await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
                 

@@ -195,6 +195,8 @@ The component should be named 'LandingPage' and exported as default.
 It must use Tailwind CSS utility classes directly within the JSX for all styling. Do NOT use inline style objects or separate CSS files.
 The page should be fully responsive using Tailwind's responsive prefixes (e.g., md:text-lg, lg:flex).
 
+Start the output IMMEDIATELY with 'import React from "react";' on the first line.
+
 Create a visually appealing and highly functional landing page.
 Incorporate a **diverse set of common landing page sections relevant to the business description provided**. This may include, but is not limited to: a hero section, features/services, about us, testimonials, pricing plans, contact form, or a call-to-action section. Ensure each section is distinct, well-designed, and flows logically.
 

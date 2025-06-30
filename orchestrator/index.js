@@ -373,6 +373,57 @@ Description for the landing page: "${prompt}"
             );
             console.log(`[${pageId}] Added custom domain: ${fullDomain}`);
 
+            // >>>>> FIX START (Added Vercel Deployment Trigger) <<<<<
+            // Explicitly trigger a deployment for the newly created project
+            console.log(`[${pageId}] Explicitly triggering Vercel deployment for project ${vercelProjectId}...`);
+            const triggeredDeployment = await callVercelApi(
+                `/v13/deployments`, // Vercel's /v13/deployments endpoint for new deployments
+                'POST',
+                {
+                    projectId: vercelProjectId,
+                    gitSource: {
+                        type: 'github',
+                        repoId: vercelProject.gitRepository.id, // Use Vercel's repo ID
+                        // For a new project created via API, you often just need projectId and repoId/orgId
+                        // Or you can specify branch, commit SHA if pulling specific state
+                        // Simplest for new project is often just project ID
+                    },
+                    ref: boilerplateRepoBranch, // The branch you just pushed to (e.g., 'main')
+                    // teamId: vercelTeamId // Only if using a team
+                }
+                // Also need to correctly pass the teamId in the URL if it's a team project
+                // The API for triggering builds can be tricky. Let's try the /v13/deployments endpoint
+                // with minimal parameters first to ensure it's hit correctly.
+                // Alternative: some APIs use /v9/projects/{projectId}/deployments
+            );
+            // Vercel's /v13/deployments requires project and git info
+            // Let's refine this Vercel API call more precisely for auto-trigger
+            const deploymentTriggerBody = {
+                name: repoSlug, // The name of the deployment, often same as project
+                // The Vercel documentation for triggering builds is a bit fragmented,
+                // but the common approach is to provide the project ID and source.
+                // It might require a 'ref' (branch name) or 'sha' (commit SHA).
+                gitSource: { // Use this for triggering from a Git source
+                    type: 'github',
+                    repoId: vercelProject.gitRepository.id, // Vercel's internal ID for the repo (from project creation)
+                    orgId: vercelProject.team.id, // Vercel's internal ID for the team (from project creation)
+                    ref: boilerplateRepoBranch, // 'main'
+                },
+                // Other options like 'target' etc. are not needed for simple deploy
+            };
+            if (!vercelTeamId) { // If it's a personal account, no orgId is needed
+                 delete deploymentTriggerBody.gitSource.orgId;
+            }
+
+            // Using the /v13/deployments endpoint as it's the more modern one for programmatically creating deployments
+            const triggeredDeployResponse = await callVercelApi(
+                `/v13/deployments${vercelTeamId ? `?teamId=${vercelTeamId}` : ''}`,
+                'POST',
+                deploymentTriggerBody
+            );
+            console.log(`[${pageId}] Vercel deployment trigger response: ${JSON.stringify(triggeredDeployResponse).substring(0, 200)}...`);
+            // >>>>> FIX END <<<<<
+
             // 7. Wait for Deployment to be READY
             let deploymentReady = false;
             let retries = 0;

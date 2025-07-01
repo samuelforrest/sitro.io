@@ -190,23 +190,21 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with Gemini
             console.log(`[${pageId}] Calling Gemini API...`);
             const reactGenerationPrompt = `
-Generate a single React TypeScript functional component for a landing page based on the following description.
-The component should be named 'LandingPage' and exported as default.
+Generate a single React TypeScript functional component for a full landing page.
+The component **MUST be named 'LandingPage'** and exported as default.
 It must use Tailwind CSS utility classes directly within the JSX for all styling. Do NOT use inline style objects or separate CSS files.
 The page should be fully responsive using Tailwind's responsive prefixes (e.g., md:text-lg, lg:flex).
 
-STEP 1: **CRITICAL FILE START: The generated component file MUST start with the following three lines, IN THIS EXACT ORDER. ABSOLUTELY NOTHING ELSE (no comments, no 'typescript' declaration, no empty lines, no extra characters) IS ALLOWED BEFORE THESE LINES. These must be the very first characters in the file, outputted VERBATIM and EXACTLY as written below:**
-**1. "use client";**
-**2. import { motion } from "framer-motion";**
-**3. import React from "react";**
-**ABSOLUTELY NO OTHER IMPORTS (e.g., useState, useEffect) ARE ALLOWED after these three.**
+**IMPORTANT NOTE FOR AI: The 'use client'; directive and core React/Framer Motion imports will be handled externally by the system. Therefore, DO NOT include "use client";, "import { motion } from 'framer-motion';", or "import React from 'react';" in your output.**
+**Begin your output directly with the 'const LandingPage: React.FC = () => {' function declaration.**
+**DO NOT include any other imports (e.g., useState, useEffect) or leading comments or other non-function-declaration-code.**
 
 **Structure & Navigation:**
 1.  **Fixed/Sticky Header (Navbar):** Include a nav element at the top.
     *   It should contain a brand/logo (text-based or simple SVG placeholder) and a set of navigation links.
     *   The navigation links (e.g., Home, Features, About, Contact) must link to different sections on the *same page* using **smooth scrolling anchors**.
-    *   Each link should have an href attribute pointing to the id of its corresponding section (e.g., <a href="#features>Features</a>).
-    *   Implement a responsive design for the navbar, typically collapsing into a hamburger menu (hidden/shown with Tailwind classes) on smaller screens (mobile-first approach).
+    *   Each link should have an href attribute pointing to the id of its corresponding section (e.g., <a href="#features">Features</a>).
+    *   Implement a responsive design for the navbar, typically collapsing into a hamburger menu (hidden/shown with Tailwind classes) on smaller screens (mobile-first approach). Provide the basic JSX structure for this, but **DO NOT include any React hooks like 'useState' or JavaScript logic for toggling the menu's visibility.** The menu's hidden/visible state should rely solely on Tailwind CSS classes or an assumed external script.
 2.  **Main Content Sections:** Incorporate a **diverse set of common landing page sections** relevant to the business description. This includes, but is not limited to:
     *   A prominent **Hero Section** with a strong headline and Call-to-Action.
     *   **Features/Services** section(s).
@@ -214,7 +212,7 @@ STEP 1: **CRITICAL FILE START: The generated component file MUST start with the 
     *   **Testimonials** or Social Proof.
     *   **Call-to-Action** section.
     *   **Contact** section (simple form or contact info).
-    *   **Crucially, each major section (excluding the header/footer) MUST have a unique, descriptive HTML id attribute** (e.g., <section id="features>, div id=about>. This is vital for the navigation links.
+    *   **Crucially, each major section (excluding the header/footer) MUST have a unique, descriptive HTML id attribute** (e.g., <section id="features">, <div id="about">). This is vital for the navigation links.
 3.  **Comprehensive Footer:** Include a footer element at the bottom.
     *   It should contain copyright information, potentially quick links, and social media icons/links (use placeholder SVG/text for icons).
 
@@ -222,26 +220,29 @@ STEP 1: **CRITICAL FILE START: The generated component file MUST start with the 
 -   **Color Palette:** Utilize a **dark, futuristic color palette**, focusing on deep blues, purples, and vibrant neon accents (e.g., electric blue, fuchsia, lime green) for highlights, text, and gradients. Avoid pure black/white, opt for very dark grays/blues and bright, saturated accents.
 -   **Animations (Strategic Use for Impact - Do NOT over-animate):**
     *   **MUST use 'framer-motion' for key elements, focusing on the Hero section, Call-to-Action, and section introductions.** Apply 'motion.' prefixes to relevant JSX elements.
-    *   For framer-motion transition properties, **ALWAYS use explicit easing keywords** such as easeIn, easeOut, easeInOut, or linear. **Do NOT use generic strings like "easeOut" without the single quotes.** For example, transition: { duration: 0.8, ease: 'easeOut' }.
+    *   For framer-motion transition properties, **ALWAYS use explicit easing keywords** such as 'easeIn', 'easeOut', 'easeInOut', or 'linear'. **Do NOT use generic strings like "easeOut" without the single quotes.** For example, transition: { duration: 0.8, ease: 'easeOut' }.
     *   Implement **simple yet elegant fade-ins and subtle slide-ups** for major sections as they come into view.
     *   Ensure **interactive hover effects** on buttons and navigation links using 'whileHover' and 'whileTap'.
     *   Minimal, subtle continuous background animations (e.g., 'animate-pulse' with low opacity or slow gradients) are encouraged for atmosphere.
     *   **Keep animation complexity reasonable to ensure efficient code generation.**
 -   **Advanced Tailwind CSS:** Utilize features like gradients (e.g., bg-gradient-to-r, from-, to-), custom shadows (shadow-xl), hover effects (hover:scale-105), transition utilities (transition duration-300), and responsive grid/flex layouts for all breakpoints.
 -   **Overall Design Principles (Very Important - Apply Consistently):**
-    -   **Consistent Spacing:** Use px- and py- on sections and inner containers to create generous and consistent padding. Use mx-auto and max-w-Xxl on main content containers within sections. Ensure consistent vertical margins (mb-) between elements.
-    -   **Visual Separation:** Use appropriate py- values for sections to create clear visual breaks. Consider subtle background color variations between sections (e.g., bg-gray-900 vs bg-gray-950).
+    -   **Consistent Spacing:** Use px- and py- on sections and inner containers to create generous and consistent padding. Use mx-auto and max-w-7xl on main content containers within sections. Ensure consistent vertical margins (mb-) between elements.
+    -   **Visual Separation:** Use appropriate py- values for sections to create clear visual breaks. Vary background shades slightly between sections (e.g., bg-gray-900 vs bg-gray-950).
     -   **Modern Layouts:** Employ grid and flex layouts effectively for complex section arrangements (e.g., multi-column feature grids, horizontally centered elements).
     -   **Interactivity:** Ensure all interactive elements have clear hover/focus states.
 
 **Content:**
 -   Generate **detailed and engaging placeholder content** that perfectly matches the business's theme and appeals to its target audience. The content should convey innovation, intelligence, and a forward-thinking approach.
+-   **Conciseness:** Generate clean, efficient, and concise code. Avoid unnecessary repetition or over-complication of basic elements.
 
-**Technical Constraints:**
--   Do NOT include any external imports beyond 'react' AND 'framer-motion'. No other libraries.
--   Do NOT include 'tailwind.config.js' or <script src="https://cdn.tailwindcss.com"></script> within the generated component code. These will be provided by the boilerplate project.
--   Ensure all JSX is valid and all TypeScript types (like React.FC) are correctly used.
--   Output ONLY the complete TypeScript React component code, starting directly with 'import React from "react";' and ending with 'export default LandingPage;'. Do not include any surrounding markdown like \`\`\`tsx or any extra conversational text.
+**Strict Constraints (Read Carefully):**
+-   **Output ONLY the complete TypeScript React component code.**
+-   **Start DIRECTLY with 'const LandingPage: React.FC = () => {'.**
+-   **End with 'export default LandingPage;'.**
+-   Do NOT include any surrounding markdown like \`\`\`tsx or any extra conversational text.
+-   Do NOT include 'tailwind.config.js' or <script src="https://cdn.tailwindcss.com"></script>.
+-   All JSX must be valid and all TypeScript types (like React.FC) are correctly used.
 
 Description for the landing page: "${prompt}"
 `;

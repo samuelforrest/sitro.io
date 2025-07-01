@@ -220,10 +220,13 @@ STEP 1: **CRITICAL FILE START: The generated component file MUST start with the 
 
 **Visual Design & Animation (Focus on "Cool, Dark AI Tech Startup"):**
 -   **Color Palette:** Utilize a **dark, futuristic color palette**, focusing on deep blues, purples, and vibrant neon accents (e.g., electric blue, fuchsia, lime green) for highlights, text, and gradients. Avoid pure black/white, opt for very dark grays/blues and bright, saturated accents.
--   **Animations:** Implement dynamic, visually engaging animations using **'framer-motion'** (e.g., motion.div, motion.h1, motion.p, motion.button). Focus on:
-    *   **Staggered fade-ins/slide-ups** for text and content blocks as they appear.
-    *   **Subtle interactive effects** on hover/tap for buttons, cards, and navigation items (e.g., whileHover, whileTap).
-    *   Consider minor background animations or glowing effects using Tailwind's animate- utilities or subtle CSS transitions to enhance the tech/AI feel.
+-   **Animations (Strategic Use for Impact - Do NOT over-animate):**
+    *   **MUST use 'framer-motion' for key elements, focusing on the Hero section, Call-to-Action, and section introductions.** Apply 'motion.' prefixes to relevant JSX elements.
+    *   For framer-motion transition properties, **ALWAYS use explicit easing keywords** such as easeIn, easeOut, easeInOut, or linear. **Do NOT use generic strings like "easeOut" without the single quotes.** For example, transition: { duration: 0.8, ease: 'easeOut' }.
+    *   Implement **simple yet elegant fade-ins and subtle slide-ups** for major sections as they come into view.
+    *   Ensure **interactive hover effects** on buttons and navigation links using 'whileHover' and 'whileTap'.
+    *   Minimal, subtle continuous background animations (e.g., 'animate-pulse' with low opacity or slow gradients) are encouraged for atmosphere.
+    *   **Keep animation complexity reasonable to ensure efficient code generation.**
 -   **Advanced Tailwind CSS:** Utilize features like gradients (e.g., bg-gradient-to-r, from-, to-), custom shadows (shadow-xl), hover effects (hover:scale-105), transition utilities (transition duration-300), and responsive grid/flex layouts for all breakpoints.
 -   **Overall Design Principles (Very Important - Apply Consistently):**
     -   **Consistent Spacing:** Use px- and py- on sections and inner containers to create generous and consistent padding. Use mx-auto and max-w-Xxl on main content containers within sections. Ensure consistent vertical margins (mb-) between elements.

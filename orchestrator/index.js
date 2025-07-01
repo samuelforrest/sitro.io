@@ -195,7 +195,7 @@ The component should be named 'LandingPage' and exported as default.
 It must use Tailwind CSS utility classes directly within the JSX for all styling. Do NOT use inline style objects or separate CSS files.
 The page should be fully responsive using Tailwind's responsive prefixes (e.g., md:text-lg, lg:flex).
 
-**CRITICAL FILE START: The generated component file MUST start with the following three lines, IN THIS EXACT ORDER. ABSOLUTELY NOTHING ELSE (no comments, no 'typescript' declaration, no empty lines) IS ALLOWED BEFORE THESE LINES. These must be the very first characters in the file:**
+STEP 1: **CRITICAL FILE START: The generated component file MUST start with the following three lines, IN THIS EXACT ORDER. ABSOLUTELY NOTHING ELSE (no comments, no 'typescript' declaration, no empty lines, no extra characters) IS ALLOWED BEFORE THESE LINES. These must be the very first characters in the file, outputted VERBATIM and EXACTLY as written below:**
 **1. "use client";**
 **2. import { motion } from "framer-motion";**
 **3. import React from "react";**

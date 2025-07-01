@@ -219,18 +219,17 @@ The page should be fully responsive using Tailwind's responsive prefixes (e.g., 
 **Visual Design & Animation (Focus on "Cool, Dark AI Tech Startup"):**
 -   **Color Palette:** Utilize a **dark, futuristic color palette**, focusing on deep blues, purples, and vibrant neon accents (e.g., electric blue, fuchsia, lime green) for highlights, text, and gradients. Avoid pure black/white, opt for very dark grays/blues and bright, saturated accents.
 -   **Animations (Strategic Use for Impact - Do NOT over-animate):**
-    *   **MUST use 'framer-motion' for key elements, focusing on the Hero section, Call-to-Action, and section introductions.** Apply 'motion.' prefixes to relevant JSX elements.
-    *   For framer-motion transition properties, **ALWAYS use explicit easing keywords** such as 'easeIn', 'easeOut', 'easeInOut', or 'linear'. **Do NOT use generic strings like "easeOut" without the single quotes.** For example, transition: { duration: 0.8, ease: 'easeOut' }.
-    *   Implement **simple yet elegant fade-ins and subtle slide-ups** for major sections as they come into view.
-    *   Ensure **interactive hover effects** on buttons and navigation links using 'whileHover' and 'whileTap'.
+    *   **MUST use 'framer-motion' for key elements.** Apply 'motion.' prefixes to relevant JSX elements.
+    *   **Framer Motion Structure Guidance:**
+        *   **For initial and whileInView (or animate) states on sections/containers:** Define a variants object (e.g., sectionVariants, itemVariants) with hidden and visible (or show) keys. Assign this to the variants prop of motion.section or motion.div. Example: variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+        *   **For whileHover and whileTap interactive effects:**
+            **DO NOT define these inside a variants object.** Instead, create a separate object (e.g., buttonHoverProps, linkInteractiveProps) that contains the whileHover and whileTap properties directly. **Spread this object onto the motion component.**
+            **Example for a button:** const buttonProps = { whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }; then use <motion.button {...buttonProps}>.
+            **Example for a link:** const linkProps = { whileHover: { y: -2, color: '#FF00FF' }, whileTap: { scale: 0.98 } }; then use <motion.a {...linkProps}>.
+    *   **CRITICAL Easing Syntax:** For **ALL** framer-motion transition properties, the ease value **MUST be one of the literal string keywords**: 'linear', 'easeIn', 'easeOut', 'easeInOut'. **It is IMPERATIVE that these strings are enclosed in SINGLE QUOTES in the generated JavaScript code.** For example, transition: { duration: 0.8, ease: 'easeOut' }. DO NOT use double quotes for the ease value.
+    *   Implement simple yet elegant fade-ins and subtle slide-ups for major sections and their content.
     *   Minimal, subtle continuous background animations (e.g., 'animate-pulse' with low opacity or slow gradients) are encouraged for atmosphere.
     *   **Keep animation complexity reasonable to ensure efficient code generation.**
--   **Advanced Tailwind CSS:** Utilize features like gradients (e.g., bg-gradient-to-r, from-, to-), custom shadows (shadow-xl), hover effects (hover:scale-105), transition utilities (transition duration-300), and responsive grid/flex layouts for all breakpoints.
--   **Overall Design Principles (Very Important - Apply Consistently):**
-    -   **Consistent Spacing:** Use px- and py- on sections and inner containers to create generous and consistent padding. Use mx-auto and max-w-7xl on main content containers within sections. Ensure consistent vertical margins (mb-) between elements.
-    -   **Visual Separation:** Use appropriate py- values for sections to create clear visual breaks. Vary background shades slightly between sections (e.g., bg-gray-900 vs bg-gray-950).
-    -   **Modern Layouts:** Employ grid and flex layouts effectively for complex section arrangements (e.g., multi-column feature grids, horizontally centered elements).
-    -   **Interactivity:** Ensure all interactive elements have clear hover/focus states.
 
 **Content:**
 -   Generate **detailed and engaging placeholder content** that perfectly matches the business's theme and appeals to its target audience. The content should convey innovation, intelligence, and a forward-thinking approach.
@@ -240,7 +239,7 @@ The page should be fully responsive using Tailwind's responsive prefixes (e.g., 
 -   **Output ONLY the complete TypeScript React component code.**
 -   **Start DIRECTLY with 'const LandingPage: React.FC = () => {'.**
 -   **End with 'export default LandingPage;'.**
--   Do NOT include any surrounding markdown like \`\`\`tsx or any extra conversational text.
+-   Do NOT include any surrounding markdown like \\\`\\\`\\\`tsx or any extra conversational text.
 -   Do NOT include 'tailwind.config.js' or <script src="https://cdn.tailwindcss.com"></script>.
 -   All JSX must be valid and all TypeScript types (like React.FC) are correctly used.
 

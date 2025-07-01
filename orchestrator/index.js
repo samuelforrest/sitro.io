@@ -247,6 +247,30 @@ Description for the landing page: "${prompt}"
             const response = await result.response;
             generatedCode = response.text().replace(/```tsx\s*|```/g, '').trim();
 
+            // --- START OF THE BETTER FIX: PROGRAMMATIC HEADER INJECTION ---
+            const requiredHeader = `"use client";\nimport { motion } from "framer-motion";\nimport React from "react";\n\n`;
+
+            // Clean AI's output by removing any incorrect header it might have tried to generate
+            const cleanGeneratedCode = generatedCode
+                // Remove correct "use client"; if AI somehow generated it
+                .replace(/^"use client";\s*/, '')
+                // Remove the AI's common error (missing leading quote)
+                .replace(/^use client";\s*/, '')
+                // Remove framer-motion import
+                .replace(/^import \{ motion \} from "framer-motion";\s*/, '')
+                // Remove React import
+                .replace(/^import React from "react";\s*/, '')
+                // Remove any accidental useState imports
+                .replace(/^import React, \{ useState \} from "react";\s*/, '')
+                // Remove any leading comments or type declarations like "typescript"
+                .replace(/^\/\/.*?\n/g, '') // Removes single-line comments at the start
+                .replace(/^\s*typescript\s*\n?/i, '') // Removes "typescript" declaration (case-insensitive)
+                .trim(); // Trim any remaining leading whitespace/newlines from the cleaned section
+
+            // Prepend the absolutely correct header to the cleaned code
+            generatedCode = requiredHeader + cleanGeneratedCode;
+            // --- END OF THE BETTER FIX ---
+
             if (!generatedCode.includes('import React from') || !generatedCode.includes('export default LandingPage')) {
                 console.error(`[${pageId}] ERROR: Invalid AI-generated code structure. Starting with: ${generatedCode.substring(0, 100)}`);
                 throw new Error('AI did not generate a valid React component named LandingPage. Check orchestrator logs for raw AI output.');

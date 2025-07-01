@@ -196,27 +196,49 @@ It must use Tailwind CSS utility classes directly within the JSX for all styling
 The page should be fully responsive using Tailwind's responsive prefixes (e.g., md:text-lg, lg:flex).
 
 Start the output IMMEDIATELY with 'import React from "react";' on the first line.
+// IMPORTANT: For advanced animations, ensure 'framer-motion' is also imported if used, e.g., 'import { motion } from "framer-motion";'
+// If framer-motion is used, ensure 'motion.' prefix is applied to animated JSX elements.
 
-Create a visually appealing and highly functional landing page.
-Incorporate a **diverse set of common landing page sections relevant to the business description provided**. This may include, but is not limited to: a hero section, features/services, about us, testimonials, pricing plans, contact form, or a call-to-action section. Ensure each section is distinct, well-designed, and flows logically.
+Create a visually appealing, highly functional, and **animated, cool, dark AI tech startup** landing page.
 
-Utilize **advanced Tailwind CSS features** where appropriate (e.g., gradients, custom shadows, hover effects, transition utilities, responsive grid/flex layouts for all breakpoints).
-Implement **subtle, visually engaging animations** using Tailwind's animate- utilities (e.g., animate-fade-in, animate-slide-in) or basic CSS transitions where appropriate.
+**Structure & Navigation:**
+1.  **Fixed/Sticky Header (Navbar):** Include a nav element at the top.
+    *   It should contain a brand/logo (text-based or simple SVG placeholder) and a set of navigation links.
+    *   The navigation links (e.g., Home, Features, About, Contact) must link to different sections on the *same page* using **smooth scrolling anchors**.
+    *   Each link should have an href attribute pointing to the id of its corresponding section (e.g., <a href="#features>Features</a>).
+    *   Implement a responsive design for the navbar, typically collapsing into a hamburger menu (hidden/shown with Tailwind classes) on smaller screens (mobile-first approach).
+2.  **Main Content Sections:** Incorporate a **diverse set of common landing page sections** relevant to the business description. This includes, but is not limited to:
+    *   A prominent **Hero Section** with a strong headline and Call-to-Action.
+    *   **Features/Services** section(s).
+    *   **About Us/Our Mission** section.
+    *   **Testimonials** or Social Proof.
+    *   **Call-to-Action** section.
+    *   **Contact** section (simple form or contact info).
+    *   **Crucially, each major section (excluding the header/footer) MUST have a unique, descriptive HTML id attribute** (e.g., <section id="features>, div id=about>. This is vital for the navigation links.
+3.  **Comprehensive Footer:** Include a footer element at the bottom.
+    *   It should contain copyright information, potentially quick links, and social media icons/links (use placeholder SVG/text for icons).
 
-**Overall Design Principles (Very Important - Apply Consistently):**
-- **Consistent Spacing:** Use px- and py- on sections and inner containers to create generous and consistent padding. Use mx-auto and max-w-Xxl on main content containers within sections. Ensure consistent vertical margins (mb-) between elements.
-- **Visual Separation:** Use appropriate py- values for sections to create clear visual breaks. Consider subtle background color variations between sections (e.g., bg-gray-900 vs bg-gray-950).
-- **Modern Layouts:** Employ grid and flex layouts effectively for complex section arrangements (e.g., multi-column feature grids, horizontally centered elements).
-- **Interactive Elements:** Ensure buttons, cards, and other interactive elements have clear hover states (e.g., hover:bg-, hover:scale-105, hover:shadow-xl, transition duration-300).
+**Visual Design & Animation (Focus on "Cool, Dark AI Tech Startup"):**
+-   **Color Palette:** Utilize a **dark, futuristic color palette**, focusing on deep blues, purples, and vibrant neon accents (e.g., electric blue, fuchsia, lime green) for highlights, text, and gradients. Avoid pure black/white, opt for very dark grays/blues and bright, saturated accents.
+-   **Animations:** Implement dynamic, visually engaging animations using **'framer-motion'** (e.g., motion.div, motion.h1, motion.p, motion.button). Focus on:
+    *   **Staggered fade-ins/slide-ups** for text and content blocks as they appear.
+    *   **Subtle interactive effects** on hover/tap for buttons, cards, and navigation items (e.g., whileHover, whileTap).
+    *   Consider minor background animations or glowing effects using Tailwind's animate- utilities or subtle CSS transitions to enhance the tech/AI feel.
+-   **Advanced Tailwind CSS:** Utilize features like gradients (e.g., bg-gradient-to-r, from-, to-), custom shadows (shadow-xl), hover effects (hover:scale-105), transition utilities (transition duration-300), and responsive grid/flex layouts for all breakpoints.
+-   **Overall Design Principles (Very Important - Apply Consistently):**
+    -   **Consistent Spacing:** Use px- and py- on sections and inner containers to create generous and consistent padding. Use mx-auto and max-w-Xxl on main content containers within sections. Ensure consistent vertical margins (mb-) between elements.
+    -   **Visual Separation:** Use appropriate py- values for sections to create clear visual breaks. Consider subtle background color variations between sections (e.g., bg-gray-900 vs bg-gray-950).
+    -   **Modern Layouts:** Employ grid and flex layouts effectively for complex section arrangements (e.g., multi-column feature grids, horizontally centered elements).
+    -   **Interactivity:** Ensure all interactive elements have clear hover/focus states.
 
-Generate **detailed and engaging placeholder content** that perfectly matches the business's theme and appeals to its target audience.
-If specific Google Fonts are requested in the description, include their <link> tags in the component's render method (e.g., right after <body> or in <head> if possible within a single component). Otherwise, use system defaults or common web-safe fonts.
-Use a **coherent color palette** based on the prompt's theme. Prefer Tailwind's default colors, but you can suggest extending Tailwind's theme.extend.colors in comments within the JSX if a specific custom color (e.g., an exact hex code) is essential for the brand.
+**Content:**
+-   Generate **detailed and engaging placeholder content** that perfectly matches the business's theme and appeals to its target audience. The content should convey innovation, intelligence, and a forward-thinking approach.
 
-Do NOT include any external imports beyond 'react'.
-Do NOT include 'tailwind.config.js' or <script src="https://cdn.tailwindcss.com"></script> within the generated component code. These will be provided by the boilerplate project.
-Ensure all JSX is valid and all TypeScript types (like React.FC) are correctly used.
-Output ONLY the complete TypeScript React component code, starting directly with 'import React from "react";' and ending with 'export default LandingPage;'. Do not include any surrounding markdown like \`\`\`tsx or any extra conversational text.
+**Technical Constraints:**
+-   Do NOT include any external imports beyond 'react' AND 'framer-motion'. No other libraries.
+-   Do NOT include 'tailwind.config.js' or <script src="https://cdn.tailwindcss.com"></script> within the generated component code. These will be provided by the boilerplate project.
+-   Ensure all JSX is valid and all TypeScript types (like React.FC) are correctly used.
+-   Output ONLY the complete TypeScript React component code, starting directly with 'import React from "react";' and ending with 'export default LandingPage;'. Do not include any surrounding markdown like \`\`\`tsx or any extra conversational text.
 
 Description for the landing page: "${prompt}"
 `;

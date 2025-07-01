@@ -248,7 +248,7 @@ Description for the landing page: "${prompt}"
 
             const result = await geminiModel.generateContent(reactGenerationPrompt);
             const response = await result.response;
-            generatedCode = response.text().replace(/```tsx\s*|```/g, '').trim();
+            let generatedCode = response.text().replace(/```tsx\s*|```/g, '').trim();
 
             // --- START OF THE BETTER FIX: PROGRAMMATIC HEADER INJECTION ---
             const requiredHeader = `"use client";\nimport { motion } from "framer-motion";\nimport React from "react";\n\n`;
@@ -273,6 +273,18 @@ Description for the landing page: "${prompt}"
             // Prepend the absolutely correct header to the cleaned code
             generatedCode = requiredHeader + cleanGeneratedCode;
             // --- END OF THE BETTER FIX ---
+
+            // --- START OF NEW FIX: PROGRAMMATIC EASE STRING LITERAL CORRECTION ---
+            // This regex finds 'ease: "someValue"' (double quotes) and replaces it with 'ease: \'someValue\'' (single quotes)
+            // This is necessary because the AI sometimes defaults to double quotes for the 'ease' property,
+            // which Framer Motion's TypeScript types often expect as a literal single-quoted string.
+            generatedCode = generatedCode.replace(/ease:\s*"(.*?)"/g, (match, p1) => {
+                // p1 is the captured content inside the double quotes.
+                // Ensure any single quotes within p1 are escaped to prevent new syntax errors
+                const escapedContent = p1.replace(/'/g, "\\'");
+                return `ease: '${escapedContent}'`; // Reconstruct with single quotes
+            });
+            // --- END OF NEW FIX ---
 
             if (!generatedCode.includes('import React from') || !generatedCode.includes('export default LandingPage')) {
                 console.error(`[${pageId}] ERROR: Invalid AI-generated code structure. Starting with: ${generatedCode.substring(0, 100)}`);

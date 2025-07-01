@@ -195,11 +195,11 @@ The component should be named 'LandingPage' and exported as default.
 It must use Tailwind CSS utility classes directly within the JSX for all styling. Do NOT use inline style objects or separate CSS files.
 The page should be fully responsive using Tailwind's responsive prefixes (e.g., md:text-lg, lg:flex).
 
-Start the output IMMEDIATELY with 'import React from "react";' on the first line.
-// IMPORTANT: For advanced animations, ensure 'framer-motion' is also imported if used, e.g., 'import { motion } from "framer-motion";'
-// If framer-motion is used, ensure 'motion.' prefix is applied to animated JSX elements.
-
-Create a visually appealing, highly functional, and **animated, cool, dark AI tech startup** landing page.
+**CRITICAL FILE START: The generated component file MUST begin with the following three lines, IN THIS EXACT ORDER:**
+**1. "use client";**
+**2. import { motion } from "framer-motion";**
+**3. import React from "react";**
+**Do NOT include any other imports beyond these.**
 
 **Structure & Navigation:**
 1.  **Fixed/Sticky Header (Navbar):** Include a nav element at the top.

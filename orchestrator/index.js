@@ -293,8 +293,9 @@ Description for the landing page: "${prompt}"
             const createRepoBody = {
                 name: repoSlug,
                 private: true, // Keep client pages private
-                description: `AI Generated Landing Page for prompt: "${prompt.substring(0, Math.min(prompt.length, 100))}"`,
-                auto_init: false, // IMPORTANT: Don't auto-initialize with README, we want it completely blank
+                // FIX: Sanitize the prompt to replace newlines and excess whitespace with single spaces
+                description: `AI Generated Landing Page for prompt: "${prompt.substring(0, Math.min(prompt.length, 100)).replace(/\s+/g, ' ').trim()}"`,
+                auto_init: false,
             };
             try {
                 const githubResponse = await fetch(`https://api.github.com/user/repos`, {

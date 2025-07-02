@@ -167,9 +167,9 @@ export default function HomePage() {
         <h1 style={styles.title}>
           Your <span style={styles.gradientText}>Landing Page Gen</span>
         </h1>
-        <p style={styles.description}>
-          WARNING TO ALL USERS: DO NOT USE THIS WEBSITE WITHOUT EXPLICIT PERMISSION FROM OWNER. THIS WEBSITE IS DANGEROUS.
-        </p>
+        <h1 style={styles.description}>
+          <b>WARNING</b>TO ALL USERS: DO NOT USE THIS WEBSITE WITHOUT EXPLICIT PERMISSION FROM OWNER. THIS WEBSITE IS DANGEROUS, ALL INPUTS ARE RECORDED. LEAVE NOW.
+        </h1>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <textarea

@@ -222,69 +222,53 @@ app.post('/generate-and-deploy', async (req, res) => {
             // generatedCode = response.text().replace(/```tsx\s*|```/g, '').trim();
 
             // ADD THIS NEW CLAUDE API CALL BLOCK:
-            const reactGenerationPrompt = `
-You are an expert React TypeScript developer specialized in creating modern, performant, and visually appealing landing pages with Tailwind CSS and Framer Motion. Your task is to generate a single React TypeScript functional component named 'LandingPage' based on the user's detailed description. This component will be used in a Next.js App Router project.
+            const reactGenerationPrompt = `You are an expert React TypeScript developer specialized in creating modern, performant, and visually appealing landing pages with Tailwind CSS and Framer Motion. Your task is to generate a single React TypeScript functional component named LandingPage based on the user's detailed description. This component will be used in a Next.js App Router project.
 
-**IMPORTANT INSTRUCTIONS FOR YOUR OUTPUT:**
-- DO NOT include any conversation or markdown (like tsx blocks) before or after the code. Provide ONLY the complete, valid TypeScript React component code.
-- DO NOT include "use client";, "import { motion } from framer-motion";, "import React from react";, or "import { easeIn, easeOut, easeInOut } from framer-motion"; in your output. These will be programmatically injected by the system.
-- Begin your output DIRECTLY with "const LandingPage: React.FC = () => {" function declaration.
-- DO NOT include any other external imports (e.g., useState, useEffect from React, or any other libraries beyond what is implicitly part of JSX/React itself).
-- DO NOT include any leading comments or other non-function-declaration-code before the "const LandingPage..." line.
-- Ensure all styling is done using Tailwind CSS utility classes directly within the JSX. Do NOT use inline style objects or separate CSS files.
-- Ensure the page is fully responsive using Tailwind responsive prefixes (e.g., md:text-lg, lg:flex).
+OUTPUT INSTRUCTIONS (STRICT):
+- Generate ONLY the complete and valid TypeScript React functional component code.
+- The component MUST be named LandingPage.
+- Start your output DIRECTLY with: const LandingPage: React.FC = () => {
+- The very last line of your output MUST be: export default LandingPage;
+- DO NOT include any conversation, markdown formatting, or external imports (e.g., useState, useEffect, or other libraries beyond basic React/Framer Motion types).
+- DO NOT include use client; or Framer Motion imports in your output; these are handled externally.
+- DO NOT include tailwind.config.js or script tags.
+- Ensure all styling uses Tailwind CSS utility classes directly within JSX. No inline style objects or separate CSS files.
+- Ensure full responsiveness using Tailwind's prefixes (e.g., md:text-lg, lg:flex).
 
-**Core Design Theme: Animated, Cool, Dark AI Tech Startup.**
-- Color Palette: Utilize a deep, dark background (e.g., very dark blue, charcoal, near-black) with vibrant, high-contrast neon accent colors (e.g., electric cyan, fuchsia, lime green, or a combination). Apply these accents to text highlights, buttons, subtle glows, and gradients. Avoid plain primary colors.
-- Animations (Strategic Use for Impact - Do NOT over-animate):
-  * MUST use "motion." prefixes from Framer Motion for key animated elements. Focus animations on the Hero section, Call-to-Action, and section introductions.
-  * Framer Motion Structure Guidance:
-    - For "initial" and "whileInView" (or "animate") states on sections/containers: Define a "variants" object (e.g., sectionVariants, itemVariants) with "hidden" and "visible" (or "show") keys. Assign this to the "variants" prop of motion.section or motion.div. Example: variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-    - For "whileHover" and "whileTap" interactive effects: DO NOT define these inside a "variants" object. Instead, create a separate object (e.g., buttonHoverProps, linkInteractiveProps) that contains the whileHover and whileTap properties directly. Spread this object onto the motion component.
-      Example for a button: const buttonProps = { whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }; then use <motion.button {...buttonProps}>.
-      Example for a link: const linkProps = { whileHover: { y: -2, color: "#FF00FF" }, whileTap: { scale: 0.98 } }; then use <motion.a {...linkProps}>.
-  * Easing for Framer Motion: For "transition" properties, use cubic bezier arrays for custom easing, or the string literal "linear".
-    - Example ease: [0.25, 0.1, 0.25, 1] (for ease-out).
-    - Example ease: [0.42, 0, 1, 1] (for ease-in).
-    - Example ease: [0.42, 0, 0.58, 1] (for ease-in-out).
-    - Example ease: "linear".
-    - NEVER use string values like "easeOut" or "easeIn" without the quotes as a variable, and do NOT use them as simple string literals with single quotes (e.g., "easeOut") if the array format is preferred, only use the cubic bezier arrays for non-linear easing.
-  * Implement simple yet elegant fade-ins and subtle slide-ups for major sections and their content.
-  * Minimal, subtle continuous background animations (e.g., animate-pulse with low opacity or slow gradients) are encouraged for atmosphere.
-  * Keep animation complexity reasonable to ensure efficient code generation.
+DESIGN & STRUCTURE GUIDANCE (FLEXIBLE & OVERRIDABLE):
+- Theme & Style: Unless the user's prompt explicitly specifies a theme (e.g., dark, light, minimalist, retro) or specific colors, default to an Animated, Cool, Dark AI Tech Startup aesthetic. This includes:
+    - Color Palette (Default): Deep, dark backgrounds (e.g., very dark blue, charcoal) with vibrant, high-contrast neon accents (electric cyan, fuchsia, lime green) for highlights and gradients.
+- Animations (Strategic Framer Motion Use): Implement dynamic, visually engaging animations. Focus on key elements like:
+    - Hero Section: Primary entrance animations (fade-in, slide-up) for headline, text, and CTA.
+    - Key Sections: Subtle animations (fade-in, scale, slide) when sections enter the viewport (whileInView).
+    - Interactive Elements: Clear hover and tap effects for buttons and links.
+    - Background: Minimal, subtle continuous background animations (e.g., gentle pulsing, animated gradients).
+    - Easing: For transition properties, use cubic bezier arrays (e.g., [0.25, 0.1, 0.25, 1] for ease-out, [0.42, 0, 0.58, 1] for ease-in-out) or the string literal linear.
 
-**Page Structure - ABSOLUTELY ESSENTIAL SECTIONS:**
-1. Fixed/Sticky Header (Navbar): Include a nav element at the top.
-   * Contain a prominent brand/logo (text-based or simple SVG placeholder) and a set of navigation links.
-   * Navigation links (e.g., Home, Features, About, Contact) must link to different sections on the same page using smooth scrolling anchors (e.g., <a href="#features">Features</a>).
-   * Implement a responsive hamburger menu (hidden/shown with Tailwind classes) for smaller screens. Provide the basic JSX structure for this, but DO NOT include any React hooks or JavaScript logic for toggling its visibility.
-2. Main Content Sections (Each MUST have a unique "id" for navigation):
-   * A prominent Hero Section (id="hero" or id="home") with a strong headline and Call-to-Action.
-   * Features/Services section(s) (id="features").
-   * About Us/Our Mission section (id="about").
-   * Testimonials or Social Proof section (id="testimonials").
-   * Call-to-Action section (id="cta").
-   * Contact section (id="contact").
-3. Comprehensive Footer: Include a footer element at the bottom.
-   * Contain copyright information, quick links, and social media icons/links (use placeholder SVG/text for icons).
+ESSENTIAL PAGE SECTIONS:
+- Fixed/Sticky Header (Navbar):
+    - Contain a prominent brand/logo (text or simple SVG placeholder).
+    - Navigation links (Home, Features, About, Testimonials, Contact) that link to sections using id anchors.
+    - Responsive hamburger menu structure for mobile (no JS logic for toggle; use Tailwind classes for hidden/shown states).
+- Main Content Sections (Each MUST have a unique id for navigation):
+    - Hero Section (id="hero" or id="home"): Strong headline, engaging sub-text, prominent Call-to-Action.
+    - Features/Services Section(s) (id="features"): Highlight offerings.
+    - About Us/Mission Section (id="about"): Explain purpose.
+    - Testimonials/Social Proof Section (id="testimonials"): Display client feedback.
+    - Call-to-Action Section (id="cta"): Final engagement push.
+    - Contact Section (id="contact"): Contact details/form.
+- Comprehensive Footer:
+    - Copyright information.
+    - Quick links.
+    - Social media icons/links (use placeholder SVG/text).
 
-**Content & Design Principles:**
-- Generate detailed, compelling, and benefit-driven placeholder content perfectly matching the business theme.
-- Consistent Spacing: Use px- and py- on sections and inner containers. Use mx-auto and max-w-7xl on main content containers. Ensure consistent vertical margins (mb-).
-- Visual Separation: Use appropriate py- values for sections. Vary background shades slightly between sections.
-- Modern Layouts: Employ grid and flex layouts effectively.
-- Interactivity: Ensure all interactive elements have clear hover: and focus: states.
-- Conciseness: Generate clean, efficient, and concise code.
-
-**Strict Output Constraints:**
-Strict Output Constraints:
-**Output ONLY the complete and valid TypeScript React functional component code.**
-**The component MUST be named 'LandingPage'.**
-**Start your output DIRECTLY with the function declaration: 'const LandingPage: React.FC = () => {'.**
-**The very last line of your output MUST be: 'export default LandingPage;'. Ensure this is present and correct.**
-**DO NOT include any surrounding markdown (like \`\`\`tsx or \`\`\`) or any conversational text.**
-**DO NOT include 'tailwind.config.js' or '<script src="https://cdn.tailwindcss.com"></script>'.
-**Ensure all JSX is valid and all TypeScript types (like React.FC) are correctly used.
+CONTENT & BEST PRACTICES:
+- Generate detailed, compelling, and benefit-driven placeholder content matching the business theme.
+- Ensure consistent spacing using Tailwind classes.
+- Create clear visual separation between sections using distinct padding values and subtle background variations.
+- Employ modern layouts (grid, flex).
+- Ensure all interactive elements have clear hover and focus states.
+- Generate clean, efficient, and concise code.
 
 Description for the landing page: "${prompt}"
 `;

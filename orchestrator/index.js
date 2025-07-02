@@ -25,7 +25,7 @@ const port = process.env.PORT || 8080;
 // const geminiApiKey = process.env.GEMINI_API_KEY;
 // ADD THESE LINES:
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY
-const claudeModel = 'claude-3-haiku-20240307'; // Using Haiku as requested
+const claudeModel = 'claude-sonnet-4-20250514'; // Using Haiku as requested
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
@@ -293,7 +293,7 @@ Description for the landing page: "${prompt}"
             try {
                 const claudeResponse = await anthropic.messages.create({
                     model: claudeModel,
-                    max_tokens: 4000, // Haiku is fast, 4000 tokens max should be plenty for a landing page
+                    max_tokens: 10000, // Haiku is fast, 4000 tokens max should be plenty for a landing page
                     messages: [
                         {
                             role: 'user',

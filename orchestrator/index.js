@@ -1,9 +1,13 @@
-// orchestrator/index.js WORKING PERFECTLY GOOD
+// orchestrator/index.js
 // THIS WORKS ALL THE WAY TILL VERCEL
 // Merged version - Database handling from file 1, Git operations from file 2
 require('dotenv').config(); // Load environment variables (locally for testing, but does nothing in Cloud Run)
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+// REMOVE THIS LINE:
+// const { GoogleGenerativeAI } = require('@google/generative-ai');
+// ADD THIS LINE:
+const Anthropic = require('@anthropic-ai/sdk'); // For Claude API
+
 const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
 const simpleGit = require('simple-git'); // For Git operations
@@ -16,9 +20,15 @@ const port = process.env.PORT || 8080;
 
 // --- Environment Variables & Client Initializations ---
 // These read directly from process.env, which is what Cloud Run provides
-const geminiApiKey = process.env.GEMINI_API_KEY;
+
+// REMOVE THIS LINE:
+// const geminiApiKey = process.env.GEMINI_API_KEY;
+// ADD THESE LINES:
+const anthropicApiKey = process.env.ANTHROPIC_API_KEY
+const claudeModel = 'claude-3-haiku-20240307'; // Using Haiku as requested
+
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // This is the key we're debugging
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 const githubUsername = process.env.GITHUB_USERNAME;
 const githubPat = process.env.GITHUB_PAT;
 const vercelApiToken = process.env.VERCEL_API_TOKEN;
@@ -31,7 +41,12 @@ const frontendUrl = process.env.FRONTEND_URL;
 // --- STARTUP LOGGING FOR DEBUGGING ---
 console.log('Orchestrator Startup Diagnostics:');
 console.log(`  PORT: ${port}`);
-console.log(`  GEMINI_API_KEY_LOADED: ${!!geminiApiKey}`);
+// REMOVE THIS LINE:
+// console.log(`  GEMINI_API_KEY_LOADED: ${!!geminiApiKey}`);
+// ADD THESE LINES:
+console.log(`  ANTHROPIC_API_KEY_LOADED: ${!!anthropicApiKey}`);
+console.log(`  CLAUDE_MODEL: ${claudeModel}`);
+
 console.log(`  SUPABASE_URL_LOADED: ${!!supabaseUrl}`);
 // >>>>>>> ADDED EXTREME SUPABASE KEY DEBUGGING <<<<<<<
 console.log(`  SUPABASE_SERVICE_KEY (RAW): '${process.env.SUPABASE_SERVICE_KEY}'`);
@@ -49,10 +64,12 @@ console.log(`  FRONTEND_URL (TRIMMED for CORS): '${frontendUrl ? frontendUrl.tri
 // --- END STARTUP LOGGING ---
 
 // Validate essential environment variables
-if (!geminiApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !githubPat || !vercelApiToken || !vercelDomain || !boilerplateRepoUrl || !frontendUrl) {
+// MODIFY THIS LINE:
+if (!anthropicApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !githubPat || !vercelApiToken || !vercelDomain || !boilerplateRepoUrl || !frontendUrl) {
     console.error("CRITICAL ERROR: One or more essential environment variables are missing or undefined!");
     console.error("  Missing/Undefined variables details:");
-    if (!geminiApiKey) console.error("    - GEMINI_API_KEY");
+    // MODIFY THIS LINE:
+    if (!anthropicApiKey) console.error("    - ANTHROPIC_API_KEY");
     if (!supabaseUrl) console.error("    - SUPABASE_URL");
     if (!supabaseServiceKey) console.error("    - SUPABASE_SERVICE_KEY");
     if (!githubUsername) console.error("    - GITHUB_USERNAME");
@@ -66,9 +83,14 @@ if (!geminiApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !
 console.log('All essential environment variables confirmed.');
 console.log(`Orchestrator will allow CORS from: '${frontendUrl.trim()}'`);
 
+// REMOVE THIS BLOCK:
 // Google Gemini
-const genAI = new GoogleGenerativeAI(geminiApiKey);
-const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+// const genAI = new GoogleGenerativeAI(geminiApiKey);
+// const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+// ADD THIS BLOCK:
+// Anthropic Claude
+const anthropic = new Anthropic({ apiKey: anthropicApiKey });
 
 // Supabase Client
 // This is the line that's failing with Invalid URL. It's using the raw variable.
@@ -187,127 +209,164 @@ app.post('/generate-and-deploy', async (req, res) => {
             await supabase.from('generated_pages').update({ status: 'generating_code' }).eq('id', pageId);
             console.log(`[${pageId}] Status updated to generating_code.`);
 
-            // 2. Generate React/TS/Tailwind Code with Gemini
-            console.log(`[${pageId}] Calling Gemini API...`);
+            // 2. Generate React/TS/Tailwind Code with Claude Haiku
+            console.log(`[${pageId}] Calling Claude API with model: ${claudeModel}...`);
+
+            // REMOVE THIS BLOCK:
+            // const reactGenerationPrompt = `
+            // Generate a single React TypeScript functional component for a full landing page.
+            // ... (rest of Gemini prompt)
+            // `;
+            // const result = await geminiModel.generateContent(reactGenerationPrompt);
+            // const response = await result.response;
+            // generatedCode = response.text().replace(/```tsx\s*|```/g, '').trim();
+
+            // ADD THIS NEW CLAUDE API CALL BLOCK:
             const reactGenerationPrompt = `
-Generate a single React TypeScript functional component for a full landing page.
-The component **MUST be named 'LandingPage'** and exported as default.
-It must use Tailwind CSS utility classes directly within the JSX for all styling. Do NOT use inline style objects or separate CSS files.
-The page should be fully responsive using Tailwind's responsive prefixes (e.g., md:text-lg, lg:flex).
+You are an expert React TypeScript developer specialized in creating modern, performant, and visually appealing landing pages with Tailwind CSS and Framer Motion. Your task is to generate a single React TypeScript functional component named 'LandingPage' based on the user's detailed description. This component will be used in a Next.js App Router project.
 
-// IMPORTANT NOTE FOR AI: The 'use client'; directive and core React/Framer Motion imports (including 'motion', 'easeIn', 'easeOut', 'easeInOut') will be handled externally by the system.
-// Therefore, DO NOT include "use client";, "import { motion } from 'framer-motion';", "import React from 'react';", OR "import { easeIn, easeOut, easeInOut } from 'framer-motion';" in your output.
-// Begin your output directly with the 'const LandingPage: React.FC = () => {' function declaration.
-// DO NOT include any other imports (e.g., useState, useEffect) or leading comments or other non-function-declaration-code.
-**IMPORTANT FRAMER MOTION EASING REQUIREMENTS:**
-- When using framer-motion transitions, ONLY use these exact easing values:
-  - ease: "linear" (with quotes)
-  - ease: [0.25, 0.1, 0.25, 1] (for ease-out, as array)
-  - ease: [0.42, 0, 1, 1] (for ease-in, as array)  
-  - ease: [0.42, 0, 0.58, 1] (for ease-in-out, as array)
-- NEVER use string values like 'easeOut' or "easeIn" - these cause TypeScript errors
-- Example correct usage: transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }
+**IMPORTANT INSTRUCTIONS FOR YOUR OUTPUT:**
+- DO NOT include any conversation or markdown (like tsx blocks) before or after the code. Provide ONLY the complete, valid TypeScript React component code.
+- DO NOT include "use client";, "import { motion } from framer-motion";, "import React from react";, or "import { easeIn, easeOut, easeInOut } from framer-motion"; in your output. These will be programmatically injected by the system.
+- Begin your output DIRECTLY with "const LandingPage: React.FC = () => {" function declaration.
+- DO NOT include any other external imports (e.g., useState, useEffect from React, or any other libraries beyond what is implicitly part of JSX/React itself).
+- DO NOT include any leading comments or other non-function-declaration-code before the "const LandingPage..." line.
+- Ensure all styling is done using Tailwind CSS utility classes directly within the JSX. Do NOT use inline style objects or separate CSS files.
+- Ensure the page is fully responsive using Tailwind responsive prefixes (e.g., md:text-lg, lg:flex).
 
-**Structure & Navigation:**
-1.  **Fixed/Sticky Header (Navbar):** Include a nav element at the top.
-    *   It should contain a brand/logo (text-based or simple SVG placeholder) and a set of navigation links.
-    *   The navigation links (e.g., Home, Features, About, Contact) must link to different sections on the *same page* using **smooth scrolling anchors**.
-    *   Each link should have an href attribute pointing to the id of its corresponding section (e.g., <a href="#features">Features</a>).
-    *   Implement a responsive design for the navbar, typically collapsing into a hamburger menu (hidden/shown with Tailwind classes) on smaller screens (mobile-first approach). Provide the basic JSX structure for this, but **DO NOT include any React hooks like 'useState' or JavaScript logic for toggling the menu's visibility.** The menu's hidden/visible state should rely solely on Tailwind CSS classes or an assumed external script.
-2.  **Main Content Sections:** Incorporate a **diverse set of common landing page sections** relevant to the business description. This includes, but is not limited to:
-    *   A prominent **Hero Section** with a strong headline and Call-to-Action.
-    *   **Features/Services** section(s).
-    *   **About Us/Our Mission** section.
-    *   **Testimonials** or Social Proof.
-    *   **Call-to-Action** section.
-    *   **Contact** section (simple form or contact info).
-    *   **Crucially, each major section (excluding the header/footer) MUST have a unique, descriptive HTML id attribute** (e.g., <section id="features">, <div id="about">). This is vital for the navigation links.
-3.  **Comprehensive Footer:** Include a footer element at the bottom.
-    *   It should contain copyright information, potentially quick links, and social media icons/links (use placeholder SVG/text for icons).
+**Core Design Theme: Animated, Cool, Dark AI Tech Startup.**
+- Color Palette: Utilize a deep, dark background (e.g., very dark blue, charcoal, near-black) with vibrant, high-contrast neon accent colors (e.g., electric cyan, fuchsia, lime green, or a combination). Apply these accents to text highlights, buttons, subtle glows, and gradients. Avoid plain primary colors.
+- Animations (Strategic Use for Impact - Do NOT over-animate):
+  * MUST use "motion." prefixes from Framer Motion for key animated elements. Focus animations on the Hero section, Call-to-Action, and section introductions.
+  * Framer Motion Structure Guidance:
+    - For "initial" and "whileInView" (or "animate") states on sections/containers: Define a "variants" object (e.g., sectionVariants, itemVariants) with "hidden" and "visible" (or "show") keys. Assign this to the "variants" prop of motion.section or motion.div. Example: variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+    - For "whileHover" and "whileTap" interactive effects: DO NOT define these inside a "variants" object. Instead, create a separate object (e.g., buttonHoverProps, linkInteractiveProps) that contains the whileHover and whileTap properties directly. Spread this object onto the motion component.
+      Example for a button: const buttonProps = { whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }; then use <motion.button {...buttonProps}>.
+      Example for a link: const linkProps = { whileHover: { y: -2, color: "#FF00FF" }, whileTap: { scale: 0.98 } }; then use <motion.a {...linkProps}>.
+  * Easing for Framer Motion: For "transition" properties, use cubic bezier arrays for custom easing, or the string literal "linear".
+    - Example ease: [0.25, 0.1, 0.25, 1] (for ease-out).
+    - Example ease: [0.42, 0, 1, 1] (for ease-in).
+    - Example ease: [0.42, 0, 0.58, 1] (for ease-in-out).
+    - Example ease: "linear".
+    - NEVER use string values like "easeOut" or "easeIn" without the quotes as a variable, and do NOT use them as simple string literals with single quotes (e.g., "easeOut") if the array format is preferred, only use the cubic bezier arrays for non-linear easing.
+  * Implement simple yet elegant fade-ins and subtle slide-ups for major sections and their content.
+  * Minimal, subtle continuous background animations (e.g., animate-pulse with low opacity or slow gradients) are encouraged for atmosphere.
+  * Keep animation complexity reasonable to ensure efficient code generation.
 
-**Visual Design & Animation (Focus on "Cool, Dark AI Tech Startup"):**
--   **Color Palette:** Utilize a **dark, futuristic color palette**, focusing on deep blues, purples, and vibrant neon accents (e.g., electric blue, fuchsia, lime green) for highlights, text, and gradients. Avoid pure black/white, opt for very dark grays/blues and bright, saturated accents.
--   **Animations (Strategic Use for Impact - Do NOT over-animate):**
-    *   **MUST use 'framer-motion' for key elements, focusing on the Hero section, Call-to-Action, and section introductions.** Apply 'motion.' prefixes to relevant JSX elements.
-    *   For framer-motion transition properties, **ALWAYS use explicit easing keywords** such as 'easeIn', 'easeOut', 'easeInOut', or 'linear'. **Do NOT use generic strings like "easeOut" without the single quotes.** For example, transition: { duration: 0.8, ease: 'easeOut' }.
-    *   Implement **simple yet elegant fade-ins and subtle slide-ups** for major sections as they come into view.
-    *   Ensure **interactive hover effects** on buttons and navigation links using 'whileHover' and 'whileTap'.
-    *   Minimal, subtle continuous background animations (e.g., 'animate-pulse' with low opacity or slow gradients) are encouraged for atmosphere.
-    *   **Keep animation complexity reasonable to ensure efficient code generation.**
--   **Advanced Tailwind CSS:** Utilize features like gradients (e.g., bg-gradient-to-r, from-, to-), custom shadows (shadow-xl), hover effects (hover:scale-105), transition utilities (transition duration-300), and responsive grid/flex layouts for all breakpoints.
--   **Overall Design Principles (Very Important - Apply Consistently):**
-    -   **Consistent Spacing:** Use px- and py- on sections and inner containers to create generous and consistent padding. Use mx-auto and max-w-7xl on main content containers within sections. Ensure consistent vertical margins (mb-) between elements.
-    -   **Visual Separation:** Use appropriate py- values for sections to create clear visual breaks. Vary background shades slightly between sections (e.g., bg-gray-900 vs bg-gray-950).
-    -   **Modern Layouts:** Employ grid and flex layouts effectively for complex section arrangements (e.g., multi-column feature grids, horizontally centered elements).
-    -   **Interactivity:** Ensure all interactive elements have clear hover/focus states.
+**Page Structure - ABSOLUTELY ESSENTIAL SECTIONS:**
+1. Fixed/Sticky Header (Navbar): Include a nav element at the top.
+   * Contain a prominent brand/logo (text-based or simple SVG placeholder) and a set of navigation links.
+   * Navigation links (e.g., Home, Features, About, Contact) must link to different sections on the same page using smooth scrolling anchors (e.g., <a href="#features">Features</a>).
+   * Implement a responsive hamburger menu (hidden/shown with Tailwind classes) for smaller screens. Provide the basic JSX structure for this, but DO NOT include any React hooks or JavaScript logic for toggling its visibility.
+2. Main Content Sections (Each MUST have a unique "id" for navigation):
+   * A prominent Hero Section (id="hero" or id="home") with a strong headline and Call-to-Action.
+   * Features/Services section(s) (id="features").
+   * About Us/Our Mission section (id="about").
+   * Testimonials or Social Proof section (id="testimonials").
+   * Call-to-Action section (id="cta").
+   * Contact section (id="contact").
+3. Comprehensive Footer: Include a footer element at the bottom.
+   * Contain copyright information, quick links, and social media icons/links (use placeholder SVG/text for icons).
 
-**Content:**
--   Generate **detailed and engaging placeholder content** that perfectly matches the business's theme and appeals to its target audience. The content should convey innovation, intelligence, and a forward-thinking approach.
--   **Conciseness:** Generate clean, efficient, and concise code. Avoid unnecessary repetition or over-complication of basic elements.
+**Content & Design Principles:**
+- Generate detailed, compelling, and benefit-driven placeholder content perfectly matching the business theme.
+- Consistent Spacing: Use px- and py- on sections and inner containers. Use mx-auto and max-w-7xl on main content containers. Ensure consistent vertical margins (mb-).
+- Visual Separation: Use appropriate py- values for sections. Vary background shades slightly between sections.
+- Modern Layouts: Employ grid and flex layouts effectively.
+- Interactivity: Ensure all interactive elements have clear hover: and focus: states.
+- Conciseness: Generate clean, efficient, and concise code.
 
-**Strict Constraints (Read Carefully):**
--   **Output ONLY the complete TypeScript React component code.**
--   **Start DIRECTLY with 'const LandingPage: React.FC = () => {'.**
--   **End with 'export default LandingPage;'.**
--   Do NOT include any surrounding markdown like \`\`\`tsx or any extra conversational text.
--   Do NOT include 'tailwind.config.js' or <script src="https://cdn.tailwindcss.com"></script>.
--   All JSX must be valid and all TypeScript types (like React.FC) are correctly used.
+**Strict Output Constraints:**
+- Output ONLY the complete TypeScript React component code.
+- End with "export default LandingPage;".
+- Do NOT include "tailwind.config.js" or <script src="https://cdn.tailwindcss.com"></script>.
+- All JSX must be valid and all TypeScript types (like React.FC) correctly used.
 
 Description for the landing page: "${prompt}"
 `;
 
-            const result = await geminiModel.generateContent(reactGenerationPrompt);
-            const response = await result.response;
-            generatedCode = response.text().replace(/```tsx\s*|```/g, '').trim();
+            let generatedCodeRaw;
+            try {
+                const claudeResponse = await anthropic.messages.create({
+                    model: claudeModel,
+                    max_tokens: 4000, // Haiku is fast, 4000 tokens should be plenty for a landing page
+                    messages: [
+                        {
+                            role: 'user',
+                            content: reactGenerationPrompt,
+                        },
+                    ],
+                });
+                generatedCodeRaw = claudeResponse.content[0].text;
+                console.log(`[${pageId}] Claude API call completed. Raw response length: ${generatedCodeRaw.length} chars.`);
+            } catch (claudeError) {
+                console.error(`[${pageId}] ERROR: Claude API call failed:`, claudeError.error || claudeError.message || claudeError);
+                throw new Error(`AI generation failed with Claude: ${claudeError.message || 'Unknown Claude API error'}`);
+            }
 
-            // --- UPDATED HEADER INJECTION WITH EASING IMPORTS ---
-        const requiredHeader = `"use client";
-        import { motion } from "framer-motion";
-        import { easeIn, easeOut, easeInOut } from "framer-motion";
-        import React from "react";
+            // Your existing cleanup logic (including header and ease fixes)
+            generatedCode = generatedCodeRaw.replace(/```tsx\s*|```/g, '').trim();
 
-        `;
+            // --- START OF THE BETTER FIX: PROGRAMMATIC HEADER INJECTION ---
+            const requiredHeader = `"use client";\nimport { motion } from "framer-motion";\nimport React from "react";\n\n`; // This line is correct
 
-        // Clean AI's output (your existing cleaning code)
-        const cleanGeneratedCode = generatedCode
-            .replace(/^"use client";\s*/, '')
-            .replace(/^use client";\s*/, '')
-            .replace(/^import \{ motion \} from "framer-motion";\s*/, '')
-            .replace(/^import React from "react";\s*/, '')
-            .replace(/^import React, \{ useState \} from "react";\s*/, '')
-            .replace(/^\/\/.*?\n/g, '')
-            .replace(/^\s*typescript\s*\n?/i, '')
-            .trim();
+            // Clean AI's output by removing any incorrect header it might have tried to generate
+            const cleanGeneratedCode = generatedCode
+                // These specific replacements are still useful as AI might try to generate them
+                .replace(/^"use client";\s*/, '')
+                .replace(/^use client";\s*/, '')
+                .replace(/^import \{ motion \} from "framer-motion";\s*/, '')
+                .replace(/^import React from "react";\s*/, '')
+                .replace(/^import React, \{ useState \} from "react";\s*/, '')
+                // ADD THIS LINE to remove Framer Motion easing imports if Claude generates them
+                .replace(/^import \{ easeIn, easeOut, easeInOut \} from "framer-motion";\s*/, '')
+                // General cleanup
+                .replace(/^\/\/.*?\n/g, '') // Removes single-line comments at the start
+                .replace(/^\s*typescript\s*\n?/i, '') // Removes "typescript" declaration (case-insensitive)
+                .trim();
 
-        // Prepend the correct header
-        generatedCode = requiredHeader + cleanGeneratedCode;
+            // Prepend the absolutely correct header to the cleaned code
+            generatedCode = requiredHeader + cleanGeneratedCode;
+            // --- END OF THE BETTER FIX ---
 
-        // --- NEW FIX: Convert ease strings to actual easing functions ---
-        generatedCode = generatedCode
-            // Replace 'easeOut' string with actual easeOut function
-            .replace(/ease:\s*['"`]easeOut['"`]/g, 'ease: easeOut')
-            // Replace 'easeIn' string with actual easeIn function  
-            .replace(/ease:\s*['"`]easeIn['"`]/g, 'ease: easeIn')
-            // Replace 'easeInOut' string with actual easeInOut function
-            .replace(/ease:\s*['"`]easeInOut['"`]/g, 'ease: easeInOut')
-            // Replace 'linear' string with actual linear function
-            .replace(/ease:\s*['"`]linear['"`]/g, 'ease: "linear"') // linear can stay as string
-            // Handle any other common easing strings
-            .replace(/ease:\s*['"`]([^'"`]+)['"`]/g, (match, easingName) => {
-                // Map common easing names to their function equivalents
-                const easingMap = {
-                    'easeOut': 'easeOut',
-                    'easeIn': 'easeIn', 
-                    'easeInOut': 'easeInOut',
-                    'linear': '"linear"', // Keep linear as string
-                    'circOut': '"circOut"',
-                    'backOut': '"backOut"'
-                };
-                return `ease: ${easingMap[easingName] || '"linear"'}`;
+            // --- START OF NEW FIX: PROGRAMMATIC EASE STRING LITERAL/FUNCTION CORRECTION ---
+            // This regex will now find 'ease: "..."' or 'ease: '...' (any quotes)
+            // It replaces them with Framer Motion's explicitly recognized literal easing strings.
+            // The prompt has been updated to encourage array format or 'linear' string for ease.
+            generatedCode = generatedCode.replace(/ease:\s*(["'])(.*?)\1/g, (match, quoteType, p1) => {
+                const originalEaseValue = p1.trim(); // Get the actual value, trim whitespace
+
+                let fixedEaseValue;
+                // Claude prefers arrays or 'linear'. We map common string names to their array equivalents or keep 'linear'.
+                // If Claude outputs 'easeOut', this converts it to [0.25, 0.1, 0.25, 1]
+                switch (originalEaseValue) {
+                    case 'easeOut':
+                    case '[0.25, 0.1, 0.25, 1]': // If AI generated it as a string array
+                        fixedEaseValue = '[0.25, 0.1, 0.25, 1]'; // Cubic bezier for ease-out
+                        break;
+                    case 'easeIn':
+                    case '[0.42, 0, 1, 1]': // If AI generated it as a string array
+                        fixedEaseValue = '[0.42, 0, 1, 1]'; // Cubic bezier for ease-in
+                        break;
+                    case 'easeInOut':
+                    case '[0.42, 0, 0.58, 1]': // If AI generated it as a string array
+                        fixedEaseValue = '[0.42, 0, 0.58, 1]'; // Cubic bezier for ease-in-out
+                        break;
+                    case 'linear':
+                        fixedEaseValue = "'linear'"; // Keep as string literal if linear
+                        break;
+                    default:
+                        // If AI generated something else, or a generic string, default to ease-out cubic bezier
+                        console.warn(`[${pageId}] WARN: AI generated unrecognized ease value: '${originalEaseValue}'. Defaulting to ease-out cubic bezier.`);
+                        fixedEaseValue = '[0.25, 0.1, 0.25, 1]';
+                }
+                // Return as 'ease: [array]' or 'ease: 'linear''
+                return `ease: ${fixedEaseValue}`;
             });
+            // --- END OF NEW FIX ---
 
-            if (!generatedCode.includes('import React from') || !generatedCode.includes('export default LandingPage')) {
-                console.error(`[${pageId}] ERROR: Invalid AI-generated code structure. Starting with: ${generatedCode.substring(0, 100)}`);
+            if (!generatedCode.includes('export default LandingPage')) {
+                console.error(`[${pageId}] ERROR: AI-generated code missing export default LandingPage. Starting with: ${generatedCode.substring(0, 200)}`);
                 throw new Error('AI did not generate a valid React component named LandingPage. Check orchestrator logs for raw AI output.');
             }
 
@@ -324,7 +383,7 @@ Description for the landing page: "${prompt}"
             const createRepoBody = {
                 name: repoSlug,
                 private: true, // Keep client pages private
-                description: `AI Generated Landing Page for prompt: "${prompt.substring(0, Math.min(prompt.length, 100))}"`,
+                description: `AI Generated Landing Page for prompt: "${prompt.substring(0, Math.min(prompt.length, 100)).replace(/\s+/g, ' ').trim()}"`, // Retained prompt sanitization
                 auto_init: false, // IMPORTANT: Don't auto-initialize with README, we want it completely blank
             };
             try {

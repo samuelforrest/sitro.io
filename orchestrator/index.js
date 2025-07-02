@@ -293,7 +293,7 @@ Description for the landing page: "${prompt}"
             try {
                 const claudeResponse = await anthropic.messages.create({
                     model: claudeModel,
-                    max_tokens: 8500, // Haiku is fast, 4000 tokens max should be plenty for a landing page
+                    max_tokens: 8000, // Haiku is fast, 4000 tokens max should be plenty for a landing page
                     messages: [
                         {
                             role: 'user',

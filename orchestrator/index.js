@@ -199,6 +199,15 @@ The page should be fully responsive using Tailwind's responsive prefixes (e.g., 
 **Begin your output directly with the 'const LandingPage: React.FC = () => {' function declaration.**
 **DO NOT include any other imports (e.g., useState, useEffect) or leading comments or other non-function-declaration-code.**
 
+**IMPORTANT FRAMER MOTION EASING REQUIREMENTS:**
+- When using framer-motion transitions, ONLY use these exact easing values:
+  - ease: "linear" (with quotes)
+  - ease: [0.25, 0.1, 0.25, 1] (for ease-out, as array)
+  - ease: [0.42, 0, 1, 1] (for ease-in, as array)  
+  - ease: [0.42, 0, 0.58, 1] (for ease-in-out, as array)
+- NEVER use string values like 'easeOut' or "easeIn" - these cause TypeScript errors
+- Example correct usage: transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }
+
 **Structure & Navigation:**
 1.  **Fixed/Sticky Header (Navbar):** Include a nav element at the top.
     *   It should contain a brand/logo (text-based or simple SVG placeholder) and a set of navigation links.
@@ -251,41 +260,51 @@ Description for the landing page: "${prompt}"
             const response = await result.response;
             generatedCode = response.text().replace(/```tsx\s*|```/g, '').trim();
 
-            // --- START OF THE BETTER FIX: PROGRAMMATIC HEADER INJECTION ---
-            const requiredHeader = `"use client";\nimport { motion } from "framer-motion";\nimport React from "react";\n\n`;
+            // --- UPDATED HEADER INJECTION WITH EASING IMPORTS ---
+        const requiredHeader = `"use client";
+        import { motion } from "framer-motion";
+        import { easeIn, easeOut, easeInOut } from "framer-motion";
+        import React from "react";
 
-            // Clean AI's output by removing any incorrect header it might have tried to generate
-            const cleanGeneratedCode = generatedCode
-                // Remove correct "use client"; if AI somehow generated it
-                .replace(/^"use client";\s*/, '')
-                // Remove the AI's common error (missing leading quote)
-                .replace(/^use client";\s*/, '')
-                // Remove framer-motion import
-                .replace(/^import \{ motion \} from "framer-motion";\s*/, '')
-                // Remove React import
-                .replace(/^import React from "react";\s*/, '')
-                // Remove any accidental useState imports
-                .replace(/^import React, \{ useState \} from "react";\s*/, '')
-                // Remove any leading comments or type declarations like "typescript"
-                .replace(/^\/\/.*?\n/g, '') // Removes single-line comments at the start
-                .replace(/^\s*typescript\s*\n?/i, '') // Removes "typescript" declaration (case-insensitive)
-                .trim(); // Trim any remaining leading whitespace/newlines from the cleaned section
+        `;
 
-            // Prepend the absolutely correct header to the cleaned code
-            generatedCode = requiredHeader + cleanGeneratedCode;
-            // --- END OF THE BETTER FIX ---
+        // Clean AI's output (your existing cleaning code)
+        const cleanGeneratedCode = generatedCode
+            .replace(/^"use client";\s*/, '')
+            .replace(/^use client";\s*/, '')
+            .replace(/^import \{ motion \} from "framer-motion";\s*/, '')
+            .replace(/^import React from "react";\s*/, '')
+            .replace(/^import React, \{ useState \} from "react";\s*/, '')
+            .replace(/^\/\/.*?\n/g, '')
+            .replace(/^\s*typescript\s*\n?/i, '')
+            .trim();
 
-            // --- START OF NEW FIX: PROGRAMMATIC EASE STRING LITERAL CORRECTION ---
-            // This regex will now find 'ease: "..."' patterns broadly within the code.
-            // It ensures that the 'ease' property always uses single quotes for its value,
-            // as Framer Motion's TypeScript types often expect a literal single-quoted string for Easing.
-            generatedCode = generatedCode.replace(/ease:\s*(")(.*?)\1/g, (match, quoteType, p1) => {
-                // p1 is the captured content inside the double quotes (e.g., "easeOut", "linear").
-                // Ensure any single quotes within p1 are escaped to prevent new syntax errors
-                const escapedContent = p1.replace(/'/g, "\\'");
-                return `ease: '${escapedContent}'`; // Always reconstruct with single quotes
+        // Prepend the correct header
+        generatedCode = requiredHeader + cleanGeneratedCode;
+
+        // --- NEW FIX: Convert ease strings to actual easing functions ---
+        generatedCode = generatedCode
+            // Replace 'easeOut' string with actual easeOut function
+            .replace(/ease:\s*['"`]easeOut['"`]/g, 'ease: easeOut')
+            // Replace 'easeIn' string with actual easeIn function  
+            .replace(/ease:\s*['"`]easeIn['"`]/g, 'ease: easeIn')
+            // Replace 'easeInOut' string with actual easeInOut function
+            .replace(/ease:\s*['"`]easeInOut['"`]/g, 'ease: easeInOut')
+            // Replace 'linear' string with actual linear function
+            .replace(/ease:\s*['"`]linear['"`]/g, 'ease: "linear"') // linear can stay as string
+            // Handle any other common easing strings
+            .replace(/ease:\s*['"`]([^'"`]+)['"`]/g, (match, easingName) => {
+                // Map common easing names to their function equivalents
+                const easingMap = {
+                    'easeOut': 'easeOut',
+                    'easeIn': 'easeIn', 
+                    'easeInOut': 'easeInOut',
+                    'linear': '"linear"', // Keep linear as string
+                    'circOut': '"circOut"',
+                    'backOut': '"backOut"'
+                };
+                return `ease: ${easingMap[easingName] || '"linear"'}`;
             });
-            // --- END OF NEW FIX ---
 
             if (!generatedCode.includes('import React from') || !generatedCode.includes('export default LandingPage')) {
                 console.error(`[${pageId}] ERROR: Invalid AI-generated code structure. Starting with: ${generatedCode.substring(0, 100)}`);

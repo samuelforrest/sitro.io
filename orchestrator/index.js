@@ -195,10 +195,10 @@ The component **MUST be named 'LandingPage'** and exported as default.
 It must use Tailwind CSS utility classes directly within the JSX for all styling. Do NOT use inline style objects or separate CSS files.
 The page should be fully responsive using Tailwind's responsive prefixes (e.g., md:text-lg, lg:flex).
 
-**IMPORTANT NOTE FOR AI: The 'use client'; directive and core React/Framer Motion imports will be handled externally by the system. Therefore, DO NOT include "use client";, "import { motion } from 'framer-motion';", or "import React from 'react';" in your output.**
-**Begin your output directly with the 'const LandingPage: React.FC = () => {' function declaration.**
-**DO NOT include any other imports (e.g., useState, useEffect) or leading comments or other non-function-declaration-code.**
-
+// IMPORTANT NOTE FOR AI: The 'use client'; directive and core React/Framer Motion imports (including 'motion', 'easeIn', 'easeOut', 'easeInOut') will be handled externally by the system.
+// Therefore, DO NOT include "use client";, "import { motion } from 'framer-motion';", "import React from 'react';", OR "import { easeIn, easeOut, easeInOut } from 'framer-motion';" in your output.
+// Begin your output directly with the 'const LandingPage: React.FC = () => {' function declaration.
+// DO NOT include any other imports (e.g., useState, useEffect) or leading comments or other non-function-declaration-code.
 **IMPORTANT FRAMER MOTION EASING REQUIREMENTS:**
 - When using framer-motion transitions, ONLY use these exact easing values:
   - ease: "linear" (with quotes)

@@ -1,4 +1,4 @@
-// orchestrator/index.js FULLY WORKS RN
+// orchestrator/index.js 
 // THIS WORKS ALL THE WAY TILL VERCEL
 // Merged version - Database handling from file 1, Git operations from file 2
 require('dotenv').config(); // Load environment variables (locally for testing, but does nothing in Cloud Run)
@@ -25,7 +25,7 @@ const port = process.env.PORT || 8080;
 // const geminiApiKey = process.env.GEMINI_API_KEY;
 // ADD THESE LINES:
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY
-const claudeModel = 'claude-sonnet-4-20250514'; // Using Haiku as requested
+const claudeModel = 'claude-3-7-sonnet-20250219'; // Using Haiku as requested
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;

@@ -275,6 +275,18 @@ Description for the landing page: "${prompt}"
             generatedCode = requiredHeader + cleanGeneratedCode;
             // --- END OF THE BETTER FIX ---
 
+            // --- START OF NEW FIX: PROGRAMMATIC EASE STRING LITERAL CORRECTION ---
+            // This regex will now find 'ease: "..."' patterns broadly within the code.
+            // It ensures that the 'ease' property always uses single quotes for its value,
+            // as Framer Motion's TypeScript types often expect a literal single-quoted string for Easing.
+            generatedCode = generatedCode.replace(/ease:\s*(")(.*?)\1/g, (match, quoteType, p1) => {
+                // p1 is the captured content inside the double quotes (e.g., "easeOut", "linear").
+                // Ensure any single quotes within p1 are escaped to prevent new syntax errors
+                const escapedContent = p1.replace(/'/g, "\\'");
+                return `ease: '${escapedContent}'`; // Always reconstruct with single quotes
+            });
+            // --- END OF NEW FIX ---
+
             if (!generatedCode.includes('import React from') || !generatedCode.includes('export default LandingPage')) {
                 console.error(`[${pageId}] ERROR: Invalid AI-generated code structure. Starting with: ${generatedCode.substring(0, 100)}`);
                 throw new Error('AI did not generate a valid React component named LandingPage. Check orchestrator logs for raw AI output.');

@@ -369,9 +369,9 @@ Description for the landing page: "${prompt}"
             });
             // --- END OF NEW FIX ---
 
-            if (!generatedCode.includes('export default LandingPage')) {
-                console.error(`[${pageId}] ERROR: AI-generated code missing export default LandingPage. Starting with: ${generatedCode.substring(0, 200)}`);
-                throw new Error('AI did not generate a valid React component named LandingPage. Check orchestrator logs for raw AI output.');
+            if (!generatedCode.includes('export default LandingPage;')) {
+                console.warn(`[${pageId}] WARN: AI omitted 'export default LandingPage;'. Appending it programmatically.`);
+                generatedCode += `\n\nexport default LandingPage;`; // Add it with newlines for formatting
             }
 
             // Update DB with generated code for Sandpack preview

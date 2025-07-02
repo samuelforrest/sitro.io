@@ -277,10 +277,14 @@ You are an expert React TypeScript developer specialized in creating modern, per
 - Conciseness: Generate clean, efficient, and concise code.
 
 **Strict Output Constraints:**
-- Output ONLY the complete TypeScript React component code.
-- End with "export default LandingPage;".
-- Do NOT include "tailwind.config.js" or <script src="https://cdn.tailwindcss.com"></script>.
-- All JSX must be valid and all TypeScript types (like React.FC) correctly used.
+Strict Output Constraints:
+**Output ONLY the complete and valid TypeScript React functional component code.**
+**The component MUST be named 'LandingPage'.**
+**Start your output DIRECTLY with the function declaration: 'const LandingPage: React.FC = () => {'.**
+**The very last line of your output MUST be: 'export default LandingPage;'. Ensure this is present and correct.**
+**DO NOT include any surrounding markdown (like \`\`\`tsx or \`\`\`) or any conversational text.**
+**DO NOT include 'tailwind.config.js' or '<script src="https://cdn.tailwindcss.com"></script>'.
+**Ensure all JSX is valid and all TypeScript types (like React.FC) are correctly used.
 
 Description for the landing page: "${prompt}"
 `;

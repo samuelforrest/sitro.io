@@ -270,6 +270,8 @@ CONTENT & BEST PRACTICES:
 - Ensure all interactive elements have clear hover and focus states.
 - Generate clean, efficient, and concise code.
 
+Limit output to around 11,500 tokens.
+
 Description for the landing page: "${prompt}"
 `;
 

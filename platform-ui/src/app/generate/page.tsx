@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { ArrowLeft, ExternalLink, Copy, Check, AlertCircle, Zap } from 'lucide-react'
 import Link from 'next/link'
-import CodeEditorAndPreview from '@/components/CodeEditorAndPreview'
 
 interface GenerateResponse {
   id: string;
@@ -31,7 +30,6 @@ function GenerateContent() {
   
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [generatedCode, setGeneratedCode] = useState('')
   const [deployedUrl, setDeployedUrl] = useState('')
   const [generationId, setGenerationId] = useState<string | null>(null)
   const [generationStatus, setGenerationStatus] = useState('')
@@ -67,7 +65,6 @@ function GenerateContent() {
 
     setIsLoading(true)
     setError('')
-    setGeneratedCode('')
     setDeployedUrl('')
     setGenerationId(null)
     setProgress(0)
@@ -94,10 +91,6 @@ function GenerateContent() {
       setGenerationStatus(data.message)
       setProgress(getProgressValue(data.status))
 
-      if (data.code) {
-        setGeneratedCode(data.code)
-      }
-
       // Step 2: Poll for status updates
       const pollStatus = async (id: string) => {
         try {
@@ -109,10 +102,6 @@ function GenerateContent() {
           const statusData: StatusResponse = await statusRes.json()
           setGenerationStatus(getStatusMessage(statusData.status))
           setProgress(getProgressValue(statusData.status))
-
-          if (statusData.generated_code && statusData.generated_code !== generatedCode) {
-            setGeneratedCode(statusData.generated_code)
-          }
 
           if (statusData.status === 'deployed' && statusData.url) {
             setDeployedUrl(statusData.url)
@@ -153,7 +142,7 @@ function GenerateContent() {
       setIsLoading(false)
       if (currentPollInterval) clearInterval(currentPollInterval)
     }
-  }, [prompt, generatedCode, deployedUrl, error, isLoading])
+  }, [prompt, deployedUrl, error, isLoading])
 
   useEffect(() => {
     if (prompt) {
@@ -253,27 +242,6 @@ function GenerateContent() {
           )}
         </CardContent>
       </Card>
-
-      {/* Code Preview */}
-      {generatedCode && (
-        <Card className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader>
-            <div className="text-center mb-4">
-              <CardTitle className="text-4xl font-black mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Generated Code Preview
-              </CardTitle>
-              <CardDescription className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Preview and edit your generated code below. You can modify it and see changes in real-time.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <CodeEditorAndPreview codeContent={generatedCode} />
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Retry Button */}
       {(error || deployedUrl) && (

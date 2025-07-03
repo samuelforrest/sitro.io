@@ -118,82 +118,131 @@ function WizardContent() {
   }, [generationIdFromUrl, pollPageStatus, deployedUrl, error, isLoading]); // Add necessary dependencies
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-gray-100 flex flex-col items-center py-12 px-4">
-      <main className="w-full max-w-6xl mx-auto space-y-10">
-        <h1 className="text-5xl md:text-6xl font-extrabold text-center mb-8 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-          Your AI Landing Page
-        </h1>
+    <div className="min-h-screen bg-white text-gray-900">
+      {/* Navigation - matching main page */}
+      <nav className="sticky top-0 z-50 px-6 py-4 backdrop-blur-md border-b bg-white/80 border-gray-200">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Fluc.io
+            </span>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <Button 
+              onClick={() => router.push('/')} 
+              className="bg-white border-2 border-gray-300 text-gray-900 hover:bg-gray-50 shadow-lg px-4 py-2 rounded-lg"
+            >
+              ← Back to Home
+            </Button>
+          </div>
+        </div>
+      </nav>
 
-        <Card className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
-          <CardContent className="space-y-4">
-            {isLoading && !error && (
-              <div className="flex flex-col items-center justify-center text-center py-8">
-                <Clock className="w-12 h-12 text-blue-400 animate-spin mb-4" />
-                <p className="text-xl font-semibold text-blue-300">
-                  {generationStatus}
-                </p>
-                {generationId && <p className="text-sm text-gray-400 mt-2">Generation ID: {generationId}</p>}
-                <p className="text-md text-gray-500 mt-4">This process can take up to 5 minutes...</p>
-              </div>
-            )}
+      <main className="px-6 py-12">
+        <div className="max-w-6xl mx-auto space-y-10">
+          <div className="text-center mb-8">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-4 leading-tight tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Your AI Landing Page
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 font-medium">
+              Watch your website come to life in real-time
+            </p>
+          </div>
 
-            {error && (
-              <div className="flex flex-col items-center justify-center text-center py-8">
-                <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-                <p className="text-xl font-semibold text-red-400">
-                  Generation Failed!
-                </p>
-                <p className="text-md text-red-300 mt-2">{error}</p>
-                <Button 
-                  onClick={() => router.push('/')} 
-                  className="mt-6 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-lg px-6 py-3 font-semibold"
-                >
-                  Go Back Home
-                </Button>
-              </div>
-            )}
+          <Card className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardContent className="space-y-6">
+              {isLoading && !error && (
+                <div className="flex flex-col items-center justify-center text-center py-12">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                    <Clock className="w-8 h-8 text-white animate-spin" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    {generationStatus}
+                  </h3>
+                  {generationId && <p className="text-sm text-gray-500 mb-4">Generation ID: {generationId}</p>}
+                  <p className="text-lg text-gray-600 max-w-md">This process can take up to 5 minutes. We&apos;re working hard to bring your vision to life!</p>
+                </div>
+              )}
 
-            {deployedUrl && (
-              <div className="text-center py-8">
-                <p className="text-2xl font-bold text-green-400 mb-4 flex items-center justify-center">
-                  <Zap className="w-8 h-8 mr-2" /> Your Page is Live! 🎉
-                </p>
-                <a 
-                  href={deployedUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-lg md:text-xl text-purple-400 hover:text-purple-300 underline break-all flex items-center justify-center transition-colors"
-                >
-                  {deployedUrl} <ExternalLink className="ml-2 w-5 h-5" />
-                </a>
-                <p className="text-gray-500 mt-4">
-                  (Click the link above to view your deployed page)
-                </p>
-                <Button 
-                  onClick={() => router.push('/')} 
-                  className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg px-6 py-3 font-semibold"
-                >
-                  Create Another Page
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {error && (
+                <div className="flex flex-col items-center justify-center text-center py-12">
+                  <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mb-6">
+                    <AlertCircle className="w-8 h-8 text-red-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-red-600 mb-2">
+                    Generation Failed!
+                  </h3>
+                  <p className="text-lg text-red-500 mb-6 max-w-md">{error}</p>
+                  <Button 
+                    onClick={() => router.push('/')} 
+                    className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-xl px-8 py-3 font-semibold shadow-lg"
+                  >
+                    Go Back Home
+                  </Button>
+                </div>
+              )}
 
-        {generatedCode && (
-          <Card className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg">
-            <CardContent>
-              <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
-                Generated Code Preview
-              </h2>
-              <p className="text-gray-400 mb-6">
-                This is the raw TSX code generated by the AI for your page.
-              </p>
-              {/* Ensure CodeEditorAndPreview is correctly imported and its styles/dependencies are met */}
-              <CodeEditorAndPreview codeContent={generatedCode} />
+              {deployedUrl && (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <Zap className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-black text-gray-900 mb-2">
+                    Your Page is Live! 🎉
+                  </h3>
+                  <p className="text-lg text-gray-600 mb-6">
+                    Your AI-generated website is ready and deployed
+                  </p>
+                  <a 
+                    href={deployedUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="inline-flex items-center text-xl font-semibold text-blue-600 hover:text-purple-600 underline break-all transition-colors mb-6"
+                  >
+                    {deployedUrl} <ExternalLink className="ml-2 w-5 h-5" />
+                  </a>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button 
+                      onClick={() => window.open(deployedUrl, '_blank')}
+                      className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl px-8 py-3 font-semibold shadow-lg"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      View Live Site
+                    </Button>
+                    <Button 
+                      onClick={() => router.push('/')} 
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl px-8 py-3 font-semibold shadow-lg"
+                    >
+                      Create Another Page
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
-        )}
+
+          {generatedCode && (
+            <Card className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardContent>
+                <div className="text-center mb-8">
+                  <h2 className="text-4xl font-black mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Generated Code Preview
+                  </h2>
+                  <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                    This is the raw TSX code generated by our AI for your website. You can preview it live below.
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <CodeEditorAndPreview codeContent={generatedCode} />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </main>
     </div>
   );
@@ -201,7 +250,17 @@ function WizardContent() {
 
 export default function WizardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-gray-100 flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-white text-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Clock className="w-8 h-8 text-white animate-spin" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading...</h2>
+          <p className="text-gray-600">Preparing your AI workspace</p>
+        </div>
+      </div>
+    }>
       <WizardContent />
     </Suspense>
   );

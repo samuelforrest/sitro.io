@@ -1,4 +1,4 @@
-// platform-ui/src/pages/index.tsx
+// platform-ui/src/pages/index.tsx SHOULD WORK
 import Head from 'next/head';
 import { useRouter } from 'next/router'; // Ensure useRouter is imported
 import React, { useState } from 'react';
@@ -168,7 +168,7 @@ export default function HomePage() {
           Your <span style={styles.gradientText}>Landing Page Gen</span>
         </h1>
         <h1 style={styles.description}>
-          <b>WARNING</b>TO ALL USERS: DO NOT USE THIS WEBSITE WITHOUT EXPLICIT PERMISSION FROM OWNER. THIS WEBSITE IS DANGEROUS, ALL INPUTS ARE RECORDED. LEAVE NOW.
+          <b>WARNING!!</b>TO ALL USERS: DO NOT USE THIS WEBSITE WITHOUT EXPLICIT PERMISSION FROM OWNER. THIS WEBSITE IS DANGEROUS, ALL INPUTS ARE RECORDED. LEAVE NOW.
         </h1>
 
         <form onSubmit={handleSubmit} style={styles.form}>

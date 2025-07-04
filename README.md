@@ -27,11 +27,13 @@ ai-lp-generator-platform/
 
 ---
 
-## 🖥️ Frontend: `/platform-ui`
+## Frontend: `/platform-ui`
+## Backend:  `/orchestrator`
 
-- **Framework:** [Next.js 15 (App Router)](https://nextjs.org/)
-- **Language:** TypeScript
-- **Styling:** [Tailwind CSS v3.4.x](https://tailwindcss.com/) (with custom gradients, modern utility classes)
+- **Framework:** [Next.js 15.3.4 (App Router)](https://nextjs.org/)
+- **Language:** TypeScript ^5
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) (latest major version with new PostCSS plugin, custom gradients, modern utility classes)
+- **CSS Processing:** [PostCSS](https://postcss.org/) with `@tailwindcss/postcss` plugin (transforms Tailwind utilities into optimized CSS)
 - **UI Components:**
   - [Radix UI Primitives](https://www.radix-ui.com/primitives/docs/components/overview) (button, card, input, badge, progress, etc.)
   - [Lucide React](https://lucide.dev/) (icon set)
@@ -42,6 +44,40 @@ ai-lp-generator-platform/
 - **API Integration:**
   - Uses `NEXT_PUBLIC_BACKEND_API_URL` from `.env.local` to connect to orchestrator
 - **No code sandbox/editor** (all code preview/editor functionality removed for simplicity and performance)
+
+---
+
+## 🎨 Why PostCSS?
+
+**PostCSS** is a critical tool in our build pipeline that transforms CSS with JavaScript plugins. Here's why we use it:
+
+### 🔧 **What PostCSS Does:**
+1. **CSS Transformation**: Takes raw CSS and processes it through plugins
+2. **Tailwind Integration**: The `@tailwindcss/postcss` plugin converts Tailwind utilities into actual CSS
+3. **Optimization**: Removes unused CSS, minifies output, adds vendor prefixes
+4. **Build Pipeline**: Integrates seamlessly with Next.js build process
+
+### ⚡️ **Our PostCSS Setup** (`postcss.config.mjs`):
+```javascript
+const config = {
+  plugins: ["@tailwindcss/postcss"], // Tailwind v4 PostCSS plugin
+};
+```
+
+### 🚀 **Why We Need It:**
+- **Tailwind CSS v4 requires PostCSS** - it's the new architecture (no more traditional config)
+- **Build-time processing** - converts `className="bg-blue-500"` into actual CSS rules
+- **Performance** - only includes CSS for utilities actually used in your components
+- **Next.js integration** - works automatically with Next.js build system
+- **Future-proof** - modern CSS processing standard
+
+### 🔄 **How It Works:**
+1. You write JSX with Tailwind classes: `<div className="bg-gradient-to-r from-blue-600 to-purple-600">`
+2. PostCSS + Tailwind plugin scans your code during build
+3. Generates optimized CSS with only the utilities you actually use
+4. Next.js serves the final, minified CSS to browsers
+
+Without PostCSS, Tailwind utilities would just be strings - PostCSS makes them actual styling!
 
 ---
 
@@ -62,21 +98,25 @@ ai-lp-generator-platform/
 ## 📦 Key Libraries & Versions
 
 ### Frontend (`platform-ui`)
-- **Next.js:** 15.x (App Router)
-- **React:** 18.x
-- **Tailwind CSS:** 3.4.x
-- **Radix UI:** 1.x (primitives only)
-- **Lucide React:** 0.367.x
-- **class-variance-authority:** 0.7.x
-- **tailwind-merge:** 2.x
+- **Next.js:** 15.3.4 (App Router)
+- **React:** ^19.0.0
+- **TypeScript:** ^5
+- **Tailwind CSS:** ^4 (latest major version)
+- **Radix UI:** ^1.x-^2.x (primitives)
+- **Lucide React:** ^0.525.0
+- **class-variance-authority:** ^0.7.1
+- **tailwind-merge:** ^3.3.1
+- **React Query:** ^5.81.5
+- **Supabase:** ^2.50.3
 
 ### Backend (`orchestrator`)
 - **Node.js:** 18+
-- **Express:** 4.x
-- **Anthropic SDK:** 0.19.x
-- **Supabase-js:** 2.x
-- **simple-git:** 3.x
-- **dotenv:** 16.x
+- **Express:** ^4.18.3
+- **Anthropic SDK:** ^0.55.1
+- **Supabase-js:** ^2.39.7
+- **simple-git:** ^3.23.0
+- **dotenv:** ^16.4.5
+- **CORS:** ^2.8.5
 
 ---
 

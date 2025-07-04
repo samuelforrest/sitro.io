@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LittlePage - AI-Powered Landing Pages",
+  title: "Juxa.io - AI-Powered Landing Pages",
   description: "Create stunning, professional landing pages in seconds with the power of AI",
+  icons: {
+    icon: '/juxalogo.ico',
+  },
 };
 
 export default function RootLayout({

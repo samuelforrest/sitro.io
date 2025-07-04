@@ -19,11 +19,9 @@ import {
   Star,
   Clock,
   Shield,
-  Twitter,
-  Github,
-  Linkedin,
   Mail
 } from "lucide-react";
+import { FaTwitter, FaGithub, FaLinkedin } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
 interface GenerateResponse {
@@ -933,16 +931,38 @@ export default function Home() {
                 The fastest way to create professional landing pages. AI-powered, no coding required.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="text-gray-300 hover:text-white transition-colors transform hover:scale-110">
-                  <Twitter className="w-6 h-6" />
+                <a 
+                  href="https://twitter.com/juxaio" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors transform hover:scale-110"
+                  aria-label="Follow us on Twitter"
+                >
+                  <FaTwitter className="w-6 h-6" />
                 </a>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors transform hover:scale-110">
-                  <Github className="w-6 h-6" />
+                <a 
+                  href="https://github.com/juxaio" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors transform hover:scale-110"
+                  aria-label="Visit our GitHub"
+                >
+                  <FaGithub className="w-6 h-6" />
                 </a>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors transform hover:scale-110">
-                  <Linkedin className="w-6 h-6" />
+                <a 
+                  href="https://linkedin.com/company/juxaio" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors transform hover:scale-110"
+                  aria-label="Connect on LinkedIn"
+                >
+                  <FaLinkedin className="w-6 h-6" />
                 </a>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors transform hover:scale-110">
+                <a 
+                  href="mailto:support@juxa.io" 
+                  className="text-gray-300 hover:text-white transition-colors transform hover:scale-110"
+                  aria-label="Send us an email"
+                >
                   <Mail className="w-6 h-6" />
                 </a>
               </div>

@@ -925,7 +925,7 @@ export default function Home() {
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">Fluc.io</span>
+                <span className="text-xl font-bold">Juxa.io</span>
               </div>
               <p className="text-gray-300 mb-4 max-w-md">
                 The fastest way to create professional landing pages. AI-powered, no coding required.

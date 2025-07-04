@@ -1,5 +1,5 @@
-// pages/index.tsx
-'use client' // The code is client side
+
+'use client'
 
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
@@ -24,14 +24,13 @@ import {
   Linkedin,
   Mail
 } from "lucide-react";
-import { useRouter } from "next/navigation"; // Changed from 'next/router' to 'next/navigation' for App Router compatibility if used
+import { useRouter } from "next/navigation";
 
-// Define interfaces for expected API responses for better TypeScript
 interface GenerateResponse {
   id: string;
-  status: string; // e.g., 'accepted'
+  status: string;
   message: string;
-  code?: string; // Optional field for initial code (if backend sends it immediately)
+  code?: string;
 }
 
 export default function Home() {
@@ -43,14 +42,10 @@ export default function Home() {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
-  // Hero text cycling
   const [heroTextIndex, setHeroTextIndex] = useState(0);
   const [heroCharIndex, setHeroCharIndex] = useState(0);
   const [isHeroDeleting, setIsHeroDeleting] = useState(false);
-  // Pricing slider
   const [promptCount, setPromptCount] = useState(100);
-  
-  // State for handling loading/error on the initial prompt submission
   const [isSubmittingPrompt, setIsSubmittingPrompt] = useState<boolean>(false);
   const [promptError, setPromptError] = useState<string>('');
 
@@ -61,7 +56,6 @@ export default function Home() {
     "customizable"
   ], []);
   
-  // Calculate price based on prompt count
   const calculatePrice = useMemo(() => {
     if (promptCount <= 50) return 0;
     if (promptCount <= 250) return 12;
@@ -70,7 +64,6 @@ export default function Home() {
     return Math.floor(promptCount * 0.05);
   }, [promptCount]);
   
-  // Custom styles for the carousel animation
   const carouselStyles = useMemo(() => `
     @keyframes scroll {
       0% {
@@ -102,7 +95,6 @@ export default function Home() {
   }, [carouselStyles]);
 
   useEffect(() => {
-    // Hero text typing animation
     const currentText = heroTexts[heroTextIndex];
     
     const timeout = setTimeout(() => {
@@ -119,15 +111,14 @@ export default function Home() {
         setHeroCharIndex(heroCharIndex + 1);
         
         if (heroCharIndex === currentText.length) {
-          setTimeout(() => setIsHeroDeleting(true), 2000); // Pause before deleting
+          setTimeout(() => setIsHeroDeleting(true), 2000);
         }
       }
-    }, isHeroDeleting ? 50 : 100); // Typing and deleting speeds
+    }, isHeroDeleting ? 50 : 100);
     
     return () => clearTimeout(timeout);
   }, [heroCharIndex, isHeroDeleting, heroTextIndex, heroTexts]);
 
-  // Placeholder typing animation
   useEffect(() => {
     const currentPrompt = placeholderPrompts[placeholderIndex];
     
@@ -145,15 +136,14 @@ export default function Home() {
         setCharIndex(charIndex + 1);
         
         if (charIndex === currentPrompt.length) {
-          setTimeout(() => setIsDeleting(true), 1000); // Pause before deleting (reduced from 2000)
+          setTimeout(() => setIsDeleting(true), 1000);
         }
       }
-    }, isDeleting ? 25 : 45); // Faster when deleting (50->25, 100->50)
+    }, isDeleting ? 25 : 45);
     
     return () => clearTimeout(timeout);
   }, [charIndex, isDeleting, placeholderIndex, placeholderPrompts]);
 
-  // MODIFIED: handleQuickCreate to initiate API call and redirect
   const handleQuickCreate = async () => {
     if (!promptText.trim()) {
       setPromptError('Please enter a description for your website.');
@@ -169,7 +159,6 @@ export default function Home() {
         throw new Error('Backend API URL is not configured. Please set NEXT_PUBLIC_BACKEND_API_URL in .env.local and redeploy.');
       }
 
-      // Step 1: Send prompt to backend Orchestrator
       const response = await fetch(backendApiUrl + '/generate-and-deploy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -181,9 +170,8 @@ export default function Home() {
         throw new Error(`Error: ${response.status} - ${errorData.error || 'Unknown error during backend processing'}`);
       }
 
-      const data: GenerateResponse = await response.json(); // Cast the response data
+      const data: GenerateResponse = await response.json();
       
-      // Redirect to the wizard page with the generation ID
       router.push(`/wizard?id=${data.id}`);
 
     } catch (err: unknown) {
@@ -193,14 +181,14 @@ export default function Home() {
       } else {
         setPromptError('An unexpected error occurred. Please try again.');
       }
-      setIsSubmittingPrompt(false); // Stop loading on error
+      setIsSubmittingPrompt(false);
     }
   };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      const navHeight = 80; // Account for sticky nav bar height
+      const navHeight = 80;
       const elementPosition = element.offsetTop - navHeight;
       
       window.scrollTo({
@@ -208,23 +196,21 @@ export default function Home() {
         behavior: 'smooth'
       });
     }
-    setIsMenuOpen(false); // Close mobile menu after navigation
+    setIsMenuOpen(false);
   };
 
   const handleGetStarted = () => {
-    // Handle get started action - could scroll to pricing or show a modal
     scrollToSection('pricing');
   };
 
   const handleMobileNavigation = (action: () => void) => {
     action();
-    setIsMenuOpen(false); // Close mobile menu after any navigation action
+    setIsMenuOpen(false);
   };
 
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
-      {/* Navigation */}
       <nav className="sticky top-0 z-50 px-6 py-4 backdrop-blur-md border-b bg-white/80 border-gray-200">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -232,7 +218,7 @@ export default function Home() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Fluc.io
+              Juxa.io
             </span>
           </div>
           
@@ -272,7 +258,6 @@ export default function Home() {
             </Button>
           </div>
           
-          {/* Mobile menu button */}
           <button 
             className="md:hidden p-2 rounded-lg transition-colors hover:bg-gray-100" 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -285,7 +270,6 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden mt-4 p-4 rounded-lg bg-gray-50">
             <div className="flex flex-col space-y-4">
@@ -293,8 +277,7 @@ export default function Home() {
               <button onClick={() => scrollToSection('faq')} className="text-left hover:text-blue-600 transition-colors">FAQ</button>
               <button onClick={() => scrollToSection('testimonials')} className="text-left hover:text-blue-600 transition-colors">Reviews</button>
               <button onClick={() => setIsMenuOpen(false)} className="text-left hover:text-blue-600 transition-colors">Our Mission</button>
-              
-              {/* Mobile Sign In and Get Started buttons */}
+
               <div className="pt-4 border-t border-gray-200 space-y-3">
                 <Button 
                   className="w-full bg-white border-2 border-gray-300 text-gray-900 hover:bg-gray-50 shadow-lg"
@@ -314,16 +297,15 @@ export default function Home() {
         )}
       </nav>
 
-      {/* Hero Section */}
       <section className="px-6 py-20 bg-white">
         <div className="max-w-6xl mx-auto text-center">
           <div className="hidden md:inline-flex items-center space-x-2 rounded-full px-6 py-2 mb-8 border bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white transition-all duration-300 transform hover:scale-105">
             <Crown className="w-4 h-4" />
-            <span className="font-semibold text-sm">AI-powered Landing Pages</span>
+            <span className="font-semibold text-sm">AI-Generated Landing Pages</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight tracking-tight animate-fade-in">
-            AI Landing Pages
+            AI-Generated websites
             <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent block mt-2">
               {typedText}
               <span className="animate-pulse">|</span>
@@ -331,14 +313,14 @@ export default function Home() {
           </h1>
           
           <p className="text-xl md:text-2xl mb-12 max-w-4xl mx-auto leading-relaxed font-medium text-gray-600">
-            Professional landing pages for freelancers, professionals and businesses.
+            Professional landing pages for freelancers, professionals, entrepreneurs and businesses.
           </p>
           
           {/* Quick Create Prompt Box */}
           <div className="max-w-3xl mx-auto mb-12 transform hover:scale-105 transition-all duration-300">
             <div className="rounded-2xl shadow-2xl border p-8 backdrop-blur-sm bg-white/90 border-gray-200">
               <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Try me, no Sign-Up required:
+                Try me, no sign up needed.
               </h3>
               <div className="relative">
                 <Input
@@ -347,11 +329,11 @@ export default function Home() {
                   onChange={(e) => setPromptText(e.target.value)}
                   className="w-full h-14 text-lg pr-16 rounded-xl border-2 bg-white border-gray-200 focus:border-blue-500 text-gray-900 placeholder:text-gray-500 transition-all duration-300 focus:scale-105"
                   onKeyPress={(e) => e.key === 'Enter' && handleQuickCreate()}
-                  disabled={isSubmittingPrompt} // Disable input when submitting
+                  disabled={isSubmittingPrompt}
                 />
                 <Button
                   onClick={handleQuickCreate}
-                  disabled={!promptText.trim() || isSubmittingPrompt} // Disable button when submitting or prompt is empty
+                  disabled={!promptText.trim() || isSubmittingPrompt}
                   className="absolute right-2 top-2 h-10 w-10 min-h-10 min-w-10 p-0 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg transition-colors duration-200"
                 >
                   {isSubmittingPrompt ? <Clock className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
@@ -390,7 +372,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="px-6 py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
@@ -402,7 +383,6 @@ export default function Home() {
             </p>
           </div>
           
-          {/* Mobile 2x2 grid */}
           <div className="grid grid-cols-2 gap-4 md:hidden">
             <Card className="border-2 bg-white border-gray-100 hover:shadow-lg transition-all duration-300 rounded-xl">
               <CardContent className="p-4 text-center">
@@ -441,9 +421,7 @@ export default function Home() {
             </Card>
           </div>
 
-          {/* Desktop/tablet layout */}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Large featured card */}
             <Card className="lg:col-span-2 border-2 bg-gradient-to-br from-blue-600 to-purple-700 text-white hover:shadow-2xl transition-all duration-300 rounded-2xl transform hover:scale-105 hover:-translate-y-2">
               <CardContent className="p-6 md:p-10">
                 <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
@@ -500,7 +478,6 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* New feature card */}
             <Card className="border-2 bg-gradient-to-br from-yellow-400 to-orange-500 text-white hover:shadow-xl transition-all duration-300 rounded-2xl transform hover:scale-105 hover:-translate-y-2">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
@@ -514,7 +491,6 @@ export default function Home() {
             </Card>
           </div>
           
-          {/* Stats section */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-black text-blue-600 mb-2">50K+</div>
@@ -536,7 +512,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section - Large Carousel */}
       <section id="testimonials" className="px-6 py-24 bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
@@ -548,7 +523,6 @@ export default function Home() {
             </p>
           </div>
           
-          {/* Testimonials Carousel */}
           <div className="relative -mx-6 overflow-hidden">
             <div className="px-6">
               <div className="flex space-x-4 md:space-x-6" style={{ animation: 'scroll 40s linear infinite' }} onMouseEnter={(e) => e.currentTarget.style.animationPlayState = 'paused'} onMouseLeave={(e) => e.currentTarget.style.animationPlayState = 'running'}>
@@ -562,7 +536,6 @@ export default function Home() {
                 ))}
               </div>
               
-              {/* Gradient overlays for fade effect */}
               <div className="absolute top-0 left-0 w-24 md:w-40 h-full bg-gradient-to-r from-blue-50 via-blue-50/80 to-transparent pointer-events-none z-20"></div>
               <div className="absolute top-0 right-0 w-24 md:w-40 h-full bg-gradient-to-l from-purple-50 via-purple-50/80 to-transparent pointer-events-none z-20"></div>
             </div>
@@ -570,7 +543,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing Section */}
       <section id="pricing" className="px-6 py-24 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
@@ -581,7 +553,6 @@ export default function Home() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto pricing-cards-container">
-            {/* Free Plan */}
             <Card className="pricing-card border-2 bg-white border-gray-200 rounded-2xl hover:shadow-xl hover:border-blue-300">
               <CardContent className="p-6 lg:p-8">
                 <div className="text-center mb-8">
@@ -629,7 +600,6 @@ export default function Home() {
               </CardContent>
             </Card>
             
-            {/* Pro Plan */}
             <Card className="pricing-card bg-gradient-to-br from-blue-600 to-purple-600 text-white border-0 rounded-2xl shadow-2xl relative overflow-visible hover:shadow-3xl">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
                 <div className="bg-yellow-400 text-gray-900 px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">
@@ -682,7 +652,6 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Business Plan */}
             <Card className="pricing-card border-2 bg-gradient-to-br from-gray-900 to-gray-800 text-white border-gray-700 rounded-2xl shadow-xl relative overflow-visible hover:shadow-2xl">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
                 <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">
@@ -732,14 +701,12 @@ export default function Home() {
             </Card>
           </div>
 
-          {/* Monthly billing note */}
           <div className="text-center mt-12">
             <p className="text-gray-500 text-sm">
               No setup fees. Cancel anytime. 80% of AI prompts use 1 credit*
             </p>
           </div>
 
-          {/* Custom Pricing Slider */}
           <div className="max-w-2xl mx-auto mt-16">
             <Card className="border-2 border-gray-200 rounded-2xl p-6 bg-gradient-to-br from-gray-50 to-white">
               <div className="text-center mb-6">
@@ -786,7 +753,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="px-6 py-24 bg-gray-50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -808,7 +774,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ Section */}
       <section id="faq" className="px-6 py-24 bg-white">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-20">
@@ -821,7 +786,6 @@ export default function Home() {
           </div>
           
           <div className="space-y-4">
-            {/* FAQ Item 1 */}
             <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
               <details className="group">
                 <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -842,7 +806,6 @@ export default function Home() {
               </details>
             </div>
 
-            {/* FAQ Item 2 */}
             <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
               <details className="group">
                 <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -863,7 +826,6 @@ export default function Home() {
               </details>
             </div>
 
-            {/* FAQ Item 4 */}
             <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
               <details className="group">
                 <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -884,7 +846,6 @@ export default function Home() {
               </details>
             </div>
 
-            {/* FAQ Item 5 */}
             <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
               <details className="group">
                 <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -905,7 +866,6 @@ export default function Home() {
               </details>
             </div>
 
-            {/* FAQ Item 6 */}
             <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
               <details className="group">
                 <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -926,7 +886,6 @@ export default function Home() {
               </details>
             </div>
 
-            {/* FAQ Item 7 */}
             <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
               <details className="group">
                 <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -948,7 +907,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* CTA at bottom of FAQ */}
           <div className="text-center mt-16">
             <p className="text-gray-600 mb-6">Still have questions?</p>
             <Button 
@@ -961,7 +919,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer id="contact" className="px-6 py-12 bg-black text-white">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">

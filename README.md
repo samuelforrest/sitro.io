@@ -37,6 +37,7 @@ ai-lp-generator-platform/
 - **UI Components:**
   - [Radix UI Primitives](https://www.radix-ui.com/primitives/docs/components/overview) (button, card, input, badge, progress, etc.)
   - [Lucide React](https://lucide.dev/) (icon set)
+  - [React Icons](https://react-icons.github.io/react-icons/) (social media icons: FontAwesome)
 - **State/UX:**
   - React Suspense (for async data and loading states)
   - Custom animated hero/placeholder text
@@ -104,6 +105,7 @@ Without PostCSS, Tailwind utilities would just be strings - PostCSS makes them a
 - **Tailwind CSS:** ^4 (latest major version)
 - **Radix UI:** ^1.x-^2.x (primitives)
 - **Lucide React:** ^0.525.0
+- **React Icons:** ^5.x (FontAwesome icons for social media)
 - **class-variance-authority:** ^0.7.1
 - **tailwind-merge:** ^3.3.1
 - **React Query:** ^5.81.5

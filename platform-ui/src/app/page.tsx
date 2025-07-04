@@ -991,7 +991,7 @@ export default function Home() {
           
           <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row items-center justify-between">
             <div className="text-gray-300 text-sm mb-4 md:mb-0">
-              © 2024 Qwiksite.io. Built with ❤️ for creators.
+              © 2025 Juxa.io. All rights reserved.
             </div>
             <div className="flex space-x-6 text-sm text-gray-300">
               <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>

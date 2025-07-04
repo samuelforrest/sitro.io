@@ -30,7 +30,7 @@ const port = process.env.PORT || 8080;
 // const claudeModel = 'claude-sonnet-4-20250514'; // Using Haiku as requested
 // ADD THESE LINES:
 const openaiApiKey = process.env.OPENAI_API_KEY;
-const gptModel = 'gpt-4.1-preview'; // Using GPT-4.1 as requested
+const gptModel = 'gpt-4.1'; // Using GPT-4.1 as requested
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
@@ -297,7 +297,7 @@ Description for the landing page: "${prompt}"
                             content: reactGenerationPrompt,
                         },
                     ],
-                    max_tokens: 12000,
+                    max_tokens: 15000,
                     temperature: 0.7,
                 });
                 generatedCodeRaw = openaiResponse.choices[0].message.content;

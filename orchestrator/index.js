@@ -5,8 +5,10 @@ require('dotenv').config(); // Load environment variables (locally for testing, 
 const express = require('express');
 // REMOVE THIS LINE:
 // const { GoogleGenerativeAI } = require('@google/generative-ai');
+// REMOVE THIS LINE:
+// const Anthropic = require('@anthropic-ai/sdk'); // For Claude API
 // ADD THIS LINE:
-const Anthropic = require('@anthropic-ai/sdk'); // For Claude API
+const OpenAI = require('openai'); // For OpenAI GPT-4.1
 
 const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
@@ -23,9 +25,12 @@ const port = process.env.PORT || 8080;
 
 // REMOVE THIS LINE:
 // const geminiApiKey = process.env.GEMINI_API_KEY;
+// REMOVE THESE LINES:
+// const anthropicApiKey = process.env.ANTHROPIC_API_KEY
+// const claudeModel = 'claude-sonnet-4-20250514'; // Using Haiku as requested
 // ADD THESE LINES:
-const anthropicApiKey = process.env.ANTHROPIC_API_KEY
-const claudeModel = 'claude-sonnet-4-20250514'; // Using Haiku as requested
+const openaiApiKey = process.env.OPENAI_API_KEY;
+const gptModel = 'gpt-4.1-preview'; // Using GPT-4.1 as requested
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
@@ -43,9 +48,12 @@ console.log('Orchestrator Startup Diagnostics:');
 console.log(`  PORT: ${port}`);
 // REMOVE THIS LINE:
 // console.log(`  GEMINI_API_KEY_LOADED: ${!!geminiApiKey}`);
+// REMOVE THESE LINES:
+// console.log(`  ANTHROPIC_API_KEY_LOADED: ${!!anthropicApiKey}`);
+// console.log(`  CLAUDE_MODEL: ${claudeModel}`);
 // ADD THESE LINES:
-console.log(`  ANTHROPIC_API_KEY_LOADED: ${!!anthropicApiKey}`);
-console.log(`  CLAUDE_MODEL: ${claudeModel}`);
+console.log(`  OPENAI_API_KEY_LOADED: ${!!openaiApiKey}`);
+console.log(`  GPT_MODEL: ${gptModel}`);
 
 console.log(`  SUPABASE_URL_LOADED: ${!!supabaseUrl}`);
 // >>>>>>> ADDED EXTREME SUPABASE KEY DEBUGGING <<<<<<<
@@ -65,11 +73,11 @@ console.log(`  FRONTEND_URL (TRIMMED for CORS): '${frontendUrl ? frontendUrl.tri
 
 // Validate essential environment variables
 // MODIFY THIS LINE:
-if (!anthropicApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !githubPat || !vercelApiToken || !vercelDomain || !boilerplateRepoUrl || !frontendUrl) {
+if (!openaiApiKey || !supabaseUrl || !supabaseServiceKey || !githubUsername || !githubPat || !vercelApiToken || !vercelDomain || !boilerplateRepoUrl || !frontendUrl) {
     console.error("CRITICAL ERROR: One or more essential environment variables are missing or undefined!");
     console.error("  Missing/Undefined variables details:");
     // MODIFY THIS LINE:
-    if (!anthropicApiKey) console.error("    - ANTHROPIC_API_KEY");
+    if (!openaiApiKey) console.error("    - OPENAI_API_KEY");
     if (!supabaseUrl) console.error("    - SUPABASE_URL");
     if (!supabaseServiceKey) console.error("    - SUPABASE_SERVICE_KEY");
     if (!githubUsername) console.error("    - GITHUB_USERNAME");
@@ -88,9 +96,13 @@ console.log(`Orchestrator will allow CORS from: '${frontendUrl.trim()}'`);
 // const genAI = new GoogleGenerativeAI(geminiApiKey);
 // const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-// ADD THIS BLOCK:
+// REMOVE THIS BLOCK:
 // Anthropic Claude
-const anthropic = new Anthropic({ apiKey: anthropicApiKey });
+// const anthropic = new Anthropic({ apiKey: anthropicApiKey });
+
+// ADD THIS BLOCK:
+// OpenAI GPT
+const openai = new OpenAI({ apiKey: openaiApiKey });
 
 // Supabase Client
 // This is the line that's failing with Invalid URL. It's using the raw variable.
@@ -209,8 +221,8 @@ app.post('/generate-and-deploy', async (req, res) => {
             await supabase.from('generated_pages').update({ status: 'generating_code' }).eq('id', pageId);
             console.log(`[${pageId}] Status updated to generating_code.`);
 
-            // 2. Generate React/TS/Tailwind Code with Claude Haiku
-            console.log(`[${pageId}] Calling Claude API with model: ${claudeModel}...`);
+            // 2. Generate React/TS/Tailwind Code with GPT-4.1
+            console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
             // REMOVE THIS BLOCK:
             // const reactGenerationPrompt = `
@@ -221,7 +233,7 @@ app.post('/generate-and-deploy', async (req, res) => {
             // const response = await result.response;
             // generatedCode = response.text().replace(/```tsx\s*|```/g, '').trim();
 
-            // ADD THIS NEW CLAUDE API CALL BLOCK:
+            // ADD THIS NEW OPENAI API CALL BLOCK:
             const reactGenerationPrompt = `You are an expert React TypeScript developer specialized in creating modern, performant, and visually appealing landing pages with Tailwind CSS and Framer Motion. Your task is to generate a single React TypeScript functional component named LandingPage based on the user's detailed description. This component will be used in a Next.js App Router project.
 
 OUTPUT INSTRUCTIONS (STRICT):
@@ -277,21 +289,22 @@ Description for the landing page: "${prompt}"
 
             let generatedCodeRaw;
             try {
-                const claudeResponse = await anthropic.messages.create({
-                    model: claudeModel,
-                    max_tokens: 12000, // Haiku is fast, 4000 tokens max should be plenty for a landing page
+                const openaiResponse = await openai.chat.completions.create({
+                    model: gptModel,
                     messages: [
                         {
                             role: 'user',
                             content: reactGenerationPrompt,
                         },
                     ],
+                    max_tokens: 12000,
+                    temperature: 0.7,
                 });
-                generatedCodeRaw = claudeResponse.content[0].text;
-                console.log(`[${pageId}] Claude API call completed. Raw response length: ${generatedCodeRaw.length} chars.`);
-            } catch (claudeError) {
-                console.error(`[${pageId}] ERROR: Claude API call failed:`, claudeError.error || claudeError.message || claudeError);
-                throw new Error(`AI generation failed with Claude: ${claudeError.message || 'Unknown Claude API error'}`);
+                generatedCodeRaw = openaiResponse.choices[0].message.content;
+                console.log(`[${pageId}] OpenAI API call completed. Raw response length: ${generatedCodeRaw.length} chars.`);
+            } catch (openaiError) {
+                console.error(`[${pageId}] ERROR: OpenAI API call failed:`, openaiError.error || openaiError.message || openaiError);
+                throw new Error(`AI generation failed with OpenAI: ${openaiError.message || 'Unknown OpenAI API error'}`);
             }
 
             // Your existing cleanup logic (including header and ease fixes)
@@ -308,7 +321,7 @@ Description for the landing page: "${prompt}"
                 .replace(/^import \{ motion \} from "framer-motion";\s*/, '')
                 .replace(/^import React from "react";\s*/, '')
                 .replace(/^import React, \{ useState \} from "react";\s*/, '')
-                // ADD THIS LINE to remove Framer Motion easing imports if Claude generates them
+                // ADD THIS LINE to remove Framer Motion easing imports if GPT generates them
                 .replace(/^import \{ easeIn, easeOut, easeInOut \} from "framer-motion";\s*/, '')
                 // General cleanup
                 .replace(/^\/\/.*?\n/g, '') // Removes single-line comments at the start
@@ -327,8 +340,8 @@ Description for the landing page: "${prompt}"
                 const originalEaseValue = p1.trim(); // Get the actual value, trim whitespace
 
                 let fixedEaseValue;
-                // Claude prefers arrays or 'linear'. We map common string names to their array equivalents or keep 'linear'.
-                // If Claude outputs 'easeOut', this converts it to [0.25, 0.1, 0.25, 1]
+                // GPT prefers arrays or 'linear'. We map common string names to their array equivalents or keep 'linear'.
+                // If GPT outputs 'easeOut', this converts it to [0.25, 0.1, 0.25, 1]
                 switch (originalEaseValue) {
                     case 'easeOut':
                     case '[0.25, 0.1, 0.25, 1]': // If AI generated it as a string array

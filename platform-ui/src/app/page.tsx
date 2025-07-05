@@ -247,6 +247,7 @@ export default function Home() {
               Reviews
             </button>
             <button 
+              onClick={() => router.push('/mission')}
               className="font-medium text-gray-600 transition-colors hover:text-blue-600"
             >
               Our Mission
@@ -281,7 +282,7 @@ export default function Home() {
               <button onClick={() => scrollToSection('pricing')} className="text-left hover:text-blue-600 transition-colors">Pricing</button>
               <button onClick={() => scrollToSection('faq')} className="text-left hover:text-blue-600 transition-colors">FAQ</button>
               <button onClick={() => scrollToSection('testimonials')} className="text-left hover:text-blue-600 transition-colors">Reviews</button>
-              <button onClick={() => setIsMenuOpen(false)} className="text-left hover:text-blue-600 transition-colors">Our Mission</button>
+              <button onClick={() => handleMobileNavigation(() => router.push('/mission'))} className="text-left hover:text-blue-600 transition-colors">Our Mission</button>
 
               <div className="pt-4 border-t border-gray-200 space-y-3">
                 <Button 

@@ -430,7 +430,7 @@ Description for the landing page: "${prompt}"
             // The newClientRepoPath will become the base for the new Git repo.
             console.log(`[${pageId}] Cloning boilerplate from ${boilerplateRepoUrl} to ${newClientRepoPath}`);
             const gitForClone = simpleGit(); // Use a dedicated git instance for cloning
-            await gitForClone.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/nextjs-lp-boilerplate.git`, newClientRepoPath, ['--branch', boilerplateRepoBranch]);
+            await gitForClone.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/vite-react-tailwind-boilerplate.git`, newClientRepoPath, ['--branch', boilerplateRepoBranch]);
             console.log(`[${pageId}] Cloned boilerplate successfully into ${newClientRepoPath}.`);
 
             // CRITICAL: Step 2: Delete the .git folder from the cloned boilerplate

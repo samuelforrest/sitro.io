@@ -360,6 +360,21 @@ export default function Home() {
             </div>
           </div>
           
+          {/* Start from Template CTA */}
+          <div className="mb-12 text-center">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <div className="h-px bg-gray-300 flex-1"></div>
+              <span className="text-gray-500 text-sm font-medium">OR</span>
+              <div className="h-px bg-gray-300 flex-1"></div>
+            </div>
+            <Button 
+              variant="outline"
+              className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl px-8 py-3 font-semibold transition-colors duration-200 shadow-lg"
+            >
+              Start from Template
+            </Button>
+          </div>
+          
           <div className="text-sm flex flex-wrap items-center justify-center gap-8 text-gray-500">
             <div className="flex items-center space-x-2">
               <Check className="w-4 h-4 text-green-500" />

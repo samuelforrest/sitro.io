@@ -311,17 +311,15 @@ Description for the landing page: "${prompt}"
             generatedCode = generatedCodeRaw.replace(/```tsx\s*|```/g, '').trim();
 
             // --- START OF THE BETTER FIX: PROGRAMMATIC HEADER INJECTION ---
-            const requiredHeader = `"use client";\nimport { motion } from "framer-motion";\nimport React from "react";\n\n`; // This line is correct
+            const requiredHeader = `import { motion } from "framer-motion";\nimport React from "react";\n\n`; // Removed "use client"
 
             // Clean AI's output by removing any incorrect header it might have tried to generate
             const cleanGeneratedCode = generatedCode
-                // These specific replacements are still useful as AI might try to generate them
-                .replace(/^"use client";\s*/, '')
-                .replace(/^use client";\s*/, '')
+                // Remove any imports that AI might try to generate (handled by requiredHeader)
                 .replace(/^import \{ motion \} from "framer-motion";\s*/, '')
                 .replace(/^import React from "react";\s*/, '')
                 .replace(/^import React, \{ useState \} from "react";\s*/, '')
-                // ADD THIS LINE to remove Framer Motion easing imports if GPT generates them
+                // Remove Framer Motion easing imports if GPT generates them
                 .replace(/^import \{ easeIn, easeOut, easeInOut \} from "framer-motion";\s*/, '')
                 // General cleanup
                 .replace(/^\/\/.*?\n/g, '') // Removes single-line comments at the start

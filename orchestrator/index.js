@@ -450,7 +450,7 @@ Description for the landing page: "${prompt}"
             await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
             
             // Step 4: Overwrite the main page.tsx with AI-generated code (within the newly initialized repo)
-            const pageTsxPath = path.join(newClientRepoPath, 'src', 'app', 'page.tsx');
+            const pageTsxPath = path.join(newClientRepoPath, 'src', 'App.tsx');
             console.log(`[${pageId}] Writing AI-generated code to: ${pageTsxPath}`);
             await fs.writeFile(pageTsxPath, generatedCode);
             console.log(`[${pageId}] Injected AI-generated code into page.tsx.`);

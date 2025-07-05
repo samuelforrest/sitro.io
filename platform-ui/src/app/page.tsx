@@ -223,7 +223,7 @@ export default function Home() {
               />
             </div>
             <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Juxa.io
+              Sitro.ai
             </span>
           </div>
           

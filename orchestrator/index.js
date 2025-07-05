@@ -494,8 +494,8 @@ Description for the landing page: "${prompt}"
                 },
                 installCommand: 'npm install', // Standard Next.js
                 buildCommand: 'npm run build', // Standard Next.js
-                outputDirectory: '.next', // Default for Next.js App Router
-                framework: 'nextjs',
+                outputDirectory: 'dist', // Vite's default output directory
+                framework: 'vite', // Tell Vercel it's a Vite project!
                 // public: false, // REMOVE THIS LINE ENTIRELY
             };
 

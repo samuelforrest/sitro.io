@@ -249,7 +249,7 @@ OUTPUT INSTRUCTIONS (STRICT):
 
 DESIGN & STRUCTURE GUIDANCE (FLEXIBLE & OVERRIDABLE):
 - Theme & Style: Unless the user's prompt explicitly specifies a theme (e.g., dark, light, minimalist, retro) or specific colors, default to an Animated, Cool, Dark AI Tech Startup aesthetic. This includes:
-    - Color Palette (Default): Deep, dark backgrounds (e.g., very dark blue, charcoal) with vibrant, high-contrast neon accents (electric cyan, fuchsia, lime green) for highlights and gradients.
+    - Color Palette (Default): Deep, dark backgrounds (e.g., very dark blue, charcoal) with a few vibrant gradients which look good, or appropriate accent colours.
 - Animations (Strategic Framer Motion Use): Implement dynamic, visually engaging animations. Focus on key elements like:
     - Hero Section: Primary entrance animations (fade-in, slide-up) for headline, text, and CTA.
     - Key Sections: Subtle animations (fade-in, scale, slide) when sections enter the viewport (whileInView).

@@ -44,6 +44,7 @@ export default function Home() {
   const [promptCount, setPromptCount] = useState(100);
   const [isSubmittingPrompt, setIsSubmittingPrompt] = useState<boolean>(false);
   const [promptError, setPromptError] = useState<string>('');
+  const [disclaimerChecked, setDisclaimerChecked] = useState(false);
 
   const heroTexts = useMemo(() => [
     "in 46 seconds",
@@ -334,9 +335,23 @@ export default function Home() {
                   onKeyPress={(e) => e.key === 'Enter' && handleQuickCreate()}
                   disabled={isSubmittingPrompt}
                 />
+                {promptText.trim() && (
+                  <div className="flex items-center mt-4">
+                    <input
+                      type="checkbox"
+                      id="disclaimer"
+                      checked={disclaimerChecked}
+                      onChange={e => setDisclaimerChecked(e.target.checked)}
+                      className="mr-2 w-4 h-4"
+                    />
+                    <label htmlFor="disclaimer" className="text-xs text-gray-700">
+                      By continuing, you consent to your website being read by anyone online, and the code being read / copied. BETA. You consent that your website cannot be deleted directly, and you must request that via email.
+                    </label>
+                  </div>
+                )}
                 <Button
                   onClick={handleQuickCreate}
-                  disabled={!promptText.trim() || isSubmittingPrompt}
+                  disabled={!promptText.trim() || isSubmittingPrompt || !disclaimerChecked}
                   className="absolute right-2 top-2 h-10 w-10 min-h-10 min-w-10 p-0 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg transition-colors duration-200"
                 >
                   {isSubmittingPrompt ? <Clock className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
@@ -436,9 +451,9 @@ export default function Home() {
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <Zap className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-4">One-Click Publishing</h3>
+                <h3 className="text-xl font-bold mb-4">Fast AI generation</h3>
                 <p className="leading-relaxed text-gray-600">
-                  No hosting headaches, no domain setup stress. Your site goes live <b>instantly</b> after generation.
+                  Sitro.io is powered by the companies <b>OpenAI</b> and <b>Anthropic</b>, behind the scenes, which boast the fastest AI models in the world.
                 </p>
               </CardContent>
             </Card>
@@ -450,7 +465,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-bold mb-4">Smart SEO Optimization</h3>
                 <p className="leading-relaxed text-white">
-                  Your landing page will come with built in search engine optimizations, inclduing Meta tags and structured data, ensuring you rank high on Google.
+                  Your landing page will come with built in search engine optimizations, inclduing Meta tags and structured data, ensuring you rank high on <b>Google.</b>
                 </p>
               </CardContent>
             </Card>
@@ -462,7 +477,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-bold mb-4">One-Click Publishing</h3>
                 <p className="leading-relaxed text-gray-600">
-                  No hosting headaches, no domain setup stress. Your site goes live instantly after generation.
+                  No hosting headaches, no domain setup stress. Your site goes live <b>instantly</b> after generation, on the sitro.io domain name
                 </p>
               </CardContent>
             </Card>
@@ -550,7 +565,7 @@ export default function Home() {
                   </li>
                   <li className="flex items-center text-gray-700">
                     <Check className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                    Jymo.ai subdomain (e.g. john-smith.jymo.ai)
+                    Sitro.io subdomain (e.g. mycv.jymo.ai)
                   </li>
                   <li className="flex items-center text-gray-700">
                     <Check className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
@@ -622,7 +637,7 @@ export default function Home() {
                   className="pro-button w-full bg-white text-blue-600 hover:bg-gray-50 rounded-xl font-bold" 
                   onClick={handleGetStarted}
                 >
-                  Start Pro Trial
+                  Not currently in stock
                 </Button>
               </CardContent>
             </Card>
@@ -670,7 +685,7 @@ export default function Home() {
                   className="calculator-button w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-bold" 
                   onClick={handleGetStarted}
                 >
-                  Start Business Plan
+                  Not currently in stock
                 </Button>
               </CardContent>
             </Card>
@@ -719,7 +734,7 @@ export default function Home() {
                     className="calculator-button w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-bold"
                     onClick={handleGetStarted}
                   >
-                    {calculatePrice === 0 ? 'Get Started Free' : `Start ${promptCount <= 250 ? "Pro" : promptCount <= 1000 ? "Business" : "Enterprise"} Plan`}
+                    {calculatePrice === 0 ? 'Get Started Free' : `Not currently in stock ${promptCount <= 250 ? "Pro" : promptCount <= 1000 ? "Business" : "Enterprise"} Plan`}
                   </Button>
                 </div>
               </div>
@@ -734,7 +749,7 @@ export default function Home() {
             It&apos;s time to build that website <span className="text-4xl md:text-6xl text-white">😉</span>
           </h2>
           <p className="text-xl mb-12 font-medium text-gray-600">
-            Join thousands of creators who trust Jymo.ai for their landing pages.
+            Join hundreds of people who trust Sitro.io for their landing pages.
           </p>
           <div className="flex justify-center">
             <Button 
@@ -756,7 +771,7 @@ export default function Home() {
               Frequently Asked Questions
             </h2>
             <p className="text-xl font-medium text-gray-600">
-              Everything you need to know about Jymo.ai
+              Everything you need to know about Sitro.io
             </p>
           </div>
           
@@ -775,7 +790,7 @@ export default function Home() {
                 </summary>
                 <div className="px-6 pb-6">
                   <p className="text-gray-600 leading-relaxed">
-                    Our vigorously trained AI analyzes your prompt and instantly creates a complete website with professional design, optimized content, and responsive layouts. Simply describe your business or project, and our AI handles everything from color schemes to content structure in around 46 seconds.
+                    Our vigorously trained AI analyzes your prompt and instantly creates a complete website with professional design, optimized content, and responsive layouts. Simply describe your business or project, and our AI handles everything from color schemes to content structure in around 94 seconds.
                   </p>
                 </div>
               </details>
@@ -795,7 +810,7 @@ export default function Home() {
                 </summary>
                 <div className="px-6 pb-6">
                   <p className="text-gray-600 leading-relaxed">
-                    Absolutely! You can make unlimited edits to your website using our intuitive editor. Pro users can also export the complete code to customize further or host elsewhere.
+                    Not yet, however this is a feature we are working on!
                   </p>
                 </div>
               </details>
@@ -875,7 +890,7 @@ export default function Home() {
                 </summary>
                 <div className="px-6 pb-6">
                   <p className="text-gray-600 leading-relaxed">
-                    We offer 24/7 AI support for all users, priority human support for Pro users, and guaranteed human support for Business users. Our support team is knowledgeable and responds quickly to help you succeed.
+                    You can contact sam@samuelforrest.me! I&apos;ll reply within 8 hours.
                   </p>
                 </div>
               </details>

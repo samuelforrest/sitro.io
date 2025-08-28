@@ -943,14 +943,14 @@ You consent to your website being read, copied, or indexed by anyone online, and
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">Juxa.io</span>
+                <span className="text-xl font-bold">Sitro.io</span>
               </div>
               <p className="text-gray-300 mb-4 max-w-md">
                 The fastest way to create professional landing pages. AI-powered, no coding required.
               </p>
               <div className="flex space-x-4">
                 <a 
-                  href="https://twitter.com/juxaio" 
+                  href="" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white transition-colors transform hover:scale-110"
@@ -959,7 +959,7 @@ You consent to your website being read, copied, or indexed by anyone online, and
                   <FaTwitter className="w-6 h-6" />
                 </a>
                 <a 
-                  href="https://github.com/juxaio" 
+                  href="" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white transition-colors transform hover:scale-110"
@@ -968,7 +968,7 @@ You consent to your website being read, copied, or indexed by anyone online, and
                   <FaGithub className="w-6 h-6" />
                 </a>
                 <a 
-                  href="https://linkedin.com/company/juxaio" 
+                  href="" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white transition-colors transform hover:scale-110"
@@ -977,7 +977,7 @@ You consent to your website being read, copied, or indexed by anyone online, and
                   <FaLinkedin className="w-6 h-6" />
                 </a>
                 <a 
-                  href="mailto:support@juxa.io" 
+                  href="mailto:sam@samuelforrest.me" 
                   className="text-gray-300 hover:text-white transition-colors transform hover:scale-110"
                   aria-label="Send us an email"
                 >
@@ -1009,7 +1009,7 @@ You consent to your website being read, copied, or indexed by anyone online, and
           
           <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row items-center justify-between">
             <div className="text-gray-300 text-sm mb-4 md:mb-0">
-              © 2025 Juxa.io. All rights reserved.
+              © 2025 Sitro.io. All rights reserved. Developed by Samuel Forrest.
             </div>
             <div className="flex space-x-6 text-sm text-gray-300">
               <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>

@@ -230,15 +230,16 @@ app.post('/generate-and-deploy', async (req, res) => {
 
     // 2. Use the AI slug if successful, otherwise fall back to the original unique ID method
     if (aiGeneratedSlug) {
-        // Append a short random ID to the AI slug to ensure it's always unique
-        repoSlug = `${aiGeneratedSlug}-${pageId.substring(0, 6)}`; 
+        // The random suffix has been removed from this line as requested.
+        // WARNING: This may cause naming collisions if two prompts generate the same slug.
+        repoSlug = aiGeneratedSlug; 
     } else {
         // Fallback if AI fails or returns an invalid slug
         console.log(`[${pageId}] Using fallback naming convention.`);
         repoSlug = `ai-lp-${pageId.substring(0, 8)}`; 
     }
     console.log(`[${pageId}] Final repoSlug decided: ${repoSlug}`);
-    // --- END: MODIFIED NAMING LOGIC ---
+// --- END: MODIFIED NAMING LOGIC ---
 
     const githubRepoUrl = `https://github.com/${githubUsername}/${repoSlug}.git`;
     let deployedUrl = '';

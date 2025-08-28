@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Juxa.io - AI-Powered Landing Pages | Build Stunning Websites Fast",
-  description: "Juxa.io lets you create beautiful, high-converting landing pages in seconds using AI. No coding, fully customizable, optimized for SEO and performance.",
+  title: "Sitro.io - AI-Powered Landing Pages | Build Stunning Websites Fast",
+  description: "Sitro.io lets you create beautiful, high-converting landing pages in seconds using AI. No coding, fully customizable, optimized for SEO and performance.",
   keywords: [
     "AI landing page builder",
     "landing page generator",
@@ -26,38 +26,40 @@ export const metadata: Metadata = {
     "AI website design",
     "digital marketing tools",
     "convert visitors to customers",
+    "lovable",
+    "lovable alternatives",
   ],
-  authors: [{ name: "Juxa.io Team" }],
-  creator: "Juxa.io",
-  publisher: "Juxa.io",
-  applicationName: "Juxa.io",
+  authors: [{ name: "Samuel Forrest" }],
+  creator: "Samuel Forrest",
+  publisher: "Samuel Forrest",
+  applicationName: "Sitro.io",
   category: "Software, AI Tools",
   colorScheme: "light",
   robots: "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
   openGraph: {
-    title: "Juxa.io - AI-Powered Landing Pages",
+    title: "Sitro.io - AI-Powered Landing Pages",
     description: "Create stunning, professional landing pages in seconds with the power of AI",
-    url: "https://juxa.io",
-    siteName: "Juxa.io",
+    url: "https://sitro.io",
+    siteName: "Sitro.io",
     type: "website",
     images: [
       {
         url: "/sitrologo.webp",
         width: 1200,
         height: 630,
-        alt: "Juxa.io AI Landing Pages",
+        alt: "Sitro.io AI Landing Pages",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Juxa.io - AI-Powered Landing Pages",
+    title: "Sitro.io - AI-Powered Landing Pages",
     description: "Create stunning, professional landing pages in seconds with the power of AI",
     images: ["/sitrologo.webp"],
-    site: "@Juxa_io",
-    creator: "@Juxa_io",
+    site: "@Sitro_io",
+    creator: "@Sitro_io",
   },
-  metadataBase: new URL("https://juxa.io"),
+  metadataBase: new URL("https://sitro.io"),
 };
 
 export default function RootLayout({
@@ -76,11 +78,11 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png" />
-        <link rel="canonical" href="https://juxa.io" />
+        <link rel="canonical" href="https://sitro.io" />
 
 
         <meta property="og:image" content="/sitrologo.webp" />
-        <meta property="og:url" content="https://juxa.io" />
+        <meta property="og:url" content="https://sitro.io" />
         <meta property="og:type" content="website" />
 
         {/* Twitter */}
@@ -94,14 +96,9 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              name: "Juxa.io",
-              url: "https://juxa.io",
-              logo: "https://juxa.io/sitrologo.webp",
-              sameAs: [
-                "https://twitter.com/Juxa_io",
-                "https://www.linkedin.com/company/juxa-io/",
-                "https://www.facebook.com/juxa.io/",
-              ],
+              name: "Sitro.io",
+              url: "https://sitro.io",
+              logo: "https://sitro.io/sitrologo.webp",
             }),
           }}
         />
@@ -111,9 +108,9 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebPage",
-              name: "Juxa.io - AI-Powered Landing Pages",
+              name: "Sitro.io - AI-Powered Landing Pages",
               description: metadata.description,
-              url: "https://juxa.io",
+              url: "https://sitro.io",
               inLanguage: "en",
             }),
           }}

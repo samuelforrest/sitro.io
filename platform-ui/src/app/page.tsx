@@ -244,12 +244,6 @@ export default function Home() {
             >
               Reviews
             </button>
-            <button 
-              onClick={() => router.push('/mission')}
-              className="font-medium text-gray-600 transition-colors hover:text-blue-600"
-            >
-              Our Mission
-            </button>
             
             <Button 
               className="nav-button bg-white border-2 border-gray-300 text-gray-900 hover:bg-gray-50 shadow-lg px-4 py-1"

@@ -895,7 +895,39 @@ export default function Home() {
                 </div>
               </details>
             </div>
+
+            <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+              <details className="group">
+                <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <h3 className="text-lg font-bold text-gray-900 pr-4">
+                    What are the terms and conditions?
+                  </h3>
+                  <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white transition-transform group-open:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                </summary>
+                <div className="px-6 pb-6">
+                  <p className="text-gray-600 leading-relaxed">
+                    This tool generates landing pages using artificial intelligence. While we strive for accuracy and quality, the content produced is not guaranteed to be error-free, original, or suitable for all purposes. Users are solely responsible for reviewing, editing, and ensuring the legality and appropriateness of the generated content before use.
+By using this tool, you agree that:
+
+All websites created are public and can be accessed by anyone online.
+You are responsible for ensuring that the content does not violate any copyright, trademark, or other intellectual property rights.
+We are not liable for any damages, legal issues, or losses arising from the use of the generated content.
+The service is provided &apos;as is,&apos; without any warranties of any kind, express or implied.
+
+You consent to your website being read, copied, or indexed by anyone online, and you waive any claims against us for the public availability of your content.
+                  </p>
+                </div>
+              </details>
+            </div>
+
+            
           </div>
+
+          
 
           <div className="text-center mt-16">
             <p className="text-gray-600 mb-6">Still have questions?</p>

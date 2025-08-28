@@ -247,9 +247,10 @@ OUTPUT INSTRUCTIONS (STRICT):
 - Ensure all styling uses Tailwind CSS utility classes directly within JSX. No inline style objects or separate CSS files.
 - Ensure full responsiveness using Tailwind's prefixes (e.g., md:text-lg, lg:flex).
 
-DESIGN & STRUCTURE GUIDANCE (FLEXIBLE & OVERRIDABLE):
+DESIGN & STRUCTURE GUIDANCE:
 - Theme & Style: Unless the user's prompt explicitly specifies a theme (e.g., dark, light, minimalist, retro) or specific colors, default to an Animated, Cool, Dark AI Tech Startup aesthetic. This includes:
     - Color Palette (Default): Deep, dark backgrounds (e.g., very dark blue, charcoal) with a few vibrant gradients which look good, or appropriate accent colours.
+    - DO NOT give buttons gradients, or text gradients, only backgrounds may have limited use of gradients.
 - Animations (Strategic Framer Motion Use): Implement dynamic, visually engaging animations. Focus on key elements like:
     - Hero Section: Primary entrance animations (fade-in, slide-up) for headline, text, and CTA.
     - Key Sections: Subtle animations (fade-in, scale, slide) when sections enter the viewport (whileInView).

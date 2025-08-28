@@ -116,6 +116,56 @@ app.use(cors({
 }));
 
 // --- Helper Functions ---
+
+// NEW HELPER FUNCTION TO GENERATE SUBDOMAIN WITH AI
+async function generateSubdomainSlug(prompt, pageId) {
+    console.log(`[${pageId}] Calling OpenAI to generate a subdomain slug.`);
+    try {
+        const slugPrompt = `
+            Analyze the following user prompt for a landing page. Your task is to extract the core subject, person's name, or brand name and create a short, clean, URL-safe slug for a subdomain.
+
+            RULES:
+            - Output ONLY the slug text. No explanations, no markdown, no quotes.
+            - The slug must be all lowercase.
+            - It should contain only letters (a-z) and numbers (0-9).
+            - Do not use hyphens or spaces.
+            - Keep it concise, ideally between 5 and 20 characters.
+
+            Examples:
+            - Prompt: "a portfolio for a photographer named John Doe" -> "johndoephoto"
+            - Prompt: "a landing page for a new SaaS product called 'Innovate AI'" -> "innovateai"
+            - Prompt: "samuel forrest cv online black color" -> "samuelforrestcv"
+            - Prompt: "a new coffee shop in brooklyn called 'The Daily Grind'" -> "dailygrind"
+
+            User Prompt: "${prompt}"
+        `;
+
+        const openaiResponse = await openai.chat.completions.create({
+            model: 'gpt-4.1', // Using a powerful model ensures better extraction
+            messages: [{ role: 'user', content: slugPrompt }],
+            max_tokens: 25,
+            temperature: 0.1, // Low temperature for deterministic, clean output
+        });
+
+        const rawSlug = openaiResponse.choices[0].message.content.trim();
+        
+        // Final sanitization just in case the AI doesn't follow rules perfectly
+        const sanitizedSlug = rawSlug.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        if (sanitizedSlug) {
+            console.log(`[${pageId}] AI generated slug: '${sanitizedSlug}'`);
+            return sanitizedSlug;
+        } else {
+            console.warn(`[${pageId}] WARN: AI returned an empty or invalid slug. Will use fallback.`);
+            return null; // Return null if AI fails or returns empty string
+        }
+
+    } catch (error) {
+        console.error(`[${pageId}] ERROR: Failed to generate subdomain slug with AI:`, error.message);
+        return null; // Return null on error to trigger the fallback
+    }
+}
+
 async function callVercelApi(endpoint, method = 'GET', body = null) {
     const headers = {
         'Authorization': `Bearer ${vercelApiToken}`,
@@ -172,7 +222,24 @@ app.post('/generate-and-deploy', async (req, res) => {
     }
 
     const pageId = randomUUID(); // Generate a unique ID for this page
-    const repoSlug = `ai-lp-${pageId.substring(0, 8)}`; // Short unique name for GitHub repo
+
+    // --- START: MODIFIED NAMING LOGIC ---
+    // 1. Attempt to generate a smart slug from the prompt using AI
+    let repoSlug;
+    const aiGeneratedSlug = await generateSubdomainSlug(prompt, pageId);
+
+    // 2. Use the AI slug if successful, otherwise fall back to the original unique ID method
+    if (aiGeneratedSlug) {
+        // Append a short random ID to the AI slug to ensure it's always unique
+        repoSlug = `${aiGeneratedSlug}-${pageId.substring(0, 6)}`; 
+    } else {
+        // Fallback if AI fails or returns an invalid slug
+        console.log(`[${pageId}] Using fallback naming convention.`);
+        repoSlug = `ai-lp-${pageId.substring(0, 8)}`; 
+    }
+    console.log(`[${pageId}] Final repoSlug decided: ${repoSlug}`);
+    // --- END: MODIFIED NAMING LOGIC ---
+
     const githubRepoUrl = `https://github.com/${githubUsername}/${repoSlug}.git`;
     let deployedUrl = '';
     let vercelProjectId = '';
@@ -224,16 +291,6 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with GPT-4.1
             console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
-            // REMOVE THIS BLOCK:
-            // const reactGenerationPrompt = `
-            // Generate a single React TypeScript functional component for a full landing page.
-            // ... (rest of Gemini prompt)
-            // `;
-            // const result = await geminiModel.generateContent(reactGenerationPrompt);
-            // const response = await result.response;
-            // generatedCode = response.text().replace(/```tsx\s*|```/g, '').trim();
-
-            // ADD THIS NEW OPENAI API CALL BLOCK:
             const reactGenerationPrompt = `You are an expert React TypeScript developer specialized in creating modern, performant, and visually appealing landing pages with Tailwind CSS and Framer Motion. Your task is to generate a single React TypeScript functional component named LandingPage based on the user's detailed description. This component will be used in a Next.js App Router project.
 
 OUTPUT INSTRUCTIONS (STRICT):
@@ -332,44 +389,36 @@ Description for the landing page: "${prompt}"
             // --- END OF THE BETTER FIX ---
 
             // --- START OF NEW FIX: PROGRAMMATIC EASE STRING LITERAL/FUNCTION CORRECTION ---
-            // This regex will now find 'ease: "..."' or 'ease: '...' (any quotes)
-            // It replaces them with Framer Motion's explicitly recognized literal easing strings.
-            // The prompt has been updated to encourage array format or 'linear' string for ease.
             generatedCode = generatedCode.replace(/ease:\s*(["'])(.*?)\1/g, (match, quoteType, p1) => {
-                const originalEaseValue = p1.trim(); // Get the actual value, trim whitespace
-
+                const originalEaseValue = p1.trim();
                 let fixedEaseValue;
-                // GPT prefers arrays or 'linear'. We map common string names to their array equivalents or keep 'linear'.
-                // If GPT outputs 'easeOut', this converts it to [0.25, 0.1, 0.25, 1]
                 switch (originalEaseValue) {
                     case 'easeOut':
-                    case '[0.25, 0.1, 0.25, 1]': // If AI generated it as a string array
-                        fixedEaseValue = '[0.25, 0.1, 0.25, 1]'; // Cubic bezier for ease-out
+                    case '[0.25, 0.1, 0.25, 1]':
+                        fixedEaseValue = '[0.25, 0.1, 0.25, 1]';
                         break;
                     case 'easeIn':
-                    case '[0.42, 0, 1, 1]': // If AI generated it as a string array
-                        fixedEaseValue = '[0.42, 0, 1, 1]'; // Cubic bezier for ease-in
+                    case '[0.42, 0, 1, 1]':
+                        fixedEaseValue = '[0.42, 0, 1, 1]';
                         break;
                     case 'easeInOut':
-                    case '[0.42, 0, 0.58, 1]': // If AI generated it as a string array
-                        fixedEaseValue = '[0.42, 0, 0.58, 1]'; // Cubic bezier for ease-in-out
+                    case '[0.42, 0, 0.58, 1]':
+                        fixedEaseValue = '[0.42, 0, 0.58, 1]';
                         break;
                     case 'linear':
-                        fixedEaseValue = "'linear'"; // Keep as string literal if linear
+                        fixedEaseValue = "'linear'";
                         break;
                     default:
-                        // If AI generated something else, or a generic string, default to ease-out cubic bezier
                         console.warn(`[${pageId}] WARN: AI generated unrecognized ease value: '${originalEaseValue}'. Defaulting to ease-out cubic bezier.`);
                         fixedEaseValue = '[0.25, 0.1, 0.25, 1]';
                 }
-                // Return as 'ease: [array]' or 'ease: 'linear''
                 return `ease: ${fixedEaseValue}`;
             });
             // --- END OF NEW FIX ---
 
             if (!generatedCode.includes('export default LandingPage;')) {
                 console.warn(`[${pageId}] WARN: AI omitted 'export default LandingPage;'. Appending it programmatically.`);
-                generatedCode += `\n\nexport default LandingPage;`; // Add it with newlines for formatting
+                generatedCode += `\n\nexport default LandingPage;`;
             }
 
             // Update DB with generated code for Sandpack preview
@@ -384,9 +433,9 @@ Description for the landing page: "${prompt}"
             console.log(`[${pageId}] Status updated to creating_repo.`);
             const createRepoBody = {
                 name: repoSlug,
-                private: true, // Keep client pages private
-                description: `AI Generated Landing Page for prompt: "${prompt.substring(0, Math.min(prompt.length, 100)).replace(/\s+/g, ' ').trim()}"`, // Retained prompt sanitization
-                auto_init: false, // IMPORTANT: Don't auto-initialize with README, we want it completely blank
+                private: true,
+                description: `AI Generated Landing Page for prompt: "${prompt.substring(0, Math.min(prompt.length, 100)).replace(/\s+/g, ' ').trim()}"`,
+                auto_init: false,
             };
             try {
                 const githubResponse = await fetch(`https://api.github.com/user/repos`, {
@@ -394,7 +443,7 @@ Description for the landing page: "${prompt}"
                     headers: {
                         'Authorization': `token ${githubPat}`,
                         'Content-Type': 'application/json',
-                        'User-Agent': githubUsername // GitHub API requires User-Agent
+                        'User-Agent': githubUsername
                     },
                     body: JSON.stringify(createRepoBody),
                 });
@@ -409,75 +458,46 @@ Description for the landing page: "${prompt}"
                 throw new Error(`Failed to create GitHub repo: ${githubErr.message}`);
             }
 
-            // 4. Prepare and Push to New GitHub Repo - USING GIT OPERATIONS FROM FILE 2
+            // 4. Prepare and Push to New GitHub Repo
             await supabase.from('generated_pages').update({ status: 'pushing_code' }).eq('id', pageId);
             console.log(`[${pageId}] Status updated to pushing_code.`);
 
-            tempDir = path.join('/tmp', pageId); // Root temp dir for this generation
-            boilerplateClonePath = path.join(tempDir, 'boilerplate_temp_clone'); // Where boilerplate is temporarily cloned
-            newClientRepoPath = path.join(tempDir, repoSlug); // Path where the new client repo will be assembled
+            tempDir = path.join('/tmp', pageId);
+            newClientRepoPath = path.join(tempDir, repoSlug);
 
             try {
-                // 1. Ensure the root temporary directory is clean and exists
                 if (await fs.stat(tempDir).catch(() => null)) {
-                await fs.rm(tempDir, { recursive: true, force: true });
-                console.log(`[${pageId}] Cleaned up existing temporary directory ${tempDir} before new operations.`);
-            }
-            await fs.mkdir(tempDir, { recursive: true });
+                    await fs.rm(tempDir, { recursive: true, force: true });
+                }
+                await fs.mkdir(tempDir, { recursive: true });
 
-            // CRITICAL: Step 1: Clone boilerplate directly into the FINAL client repo path
-            // The newClientRepoPath will become the base for the new Git repo.
-            console.log(`[${pageId}] Cloning boilerplate from ${boilerplateRepoUrl} to ${newClientRepoPath}`);
-            const gitForClone = simpleGit(); // Use a dedicated git instance for cloning
-            await gitForClone.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/vite-react-tailwind-boilerplate.git`, newClientRepoPath, ['--branch', boilerplateRepoBranch]);
-            console.log(`[${pageId}] Cloned boilerplate successfully into ${newClientRepoPath}.`);
+                const gitForClone = simpleGit();
+                await gitForClone.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/vite-react-tailwind-boilerplate.git`, newClientRepoPath, ['--branch', boilerplateRepoBranch]);
+                
+                const dotGitPath = path.join(newClientRepoPath, '.git');
+                if (await fs.stat(dotGitPath).catch(() => null)) {
+                    await fs.rm(dotGitPath, { recursive: true, force: true });
+                }
+                
+                const newRepoGit = simpleGit({ baseDir: newClientRepoPath });
+                await newRepoGit.init();
+                await newRepoGit.addConfig('user.name', githubUsername);
+                await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
+                
+                const pageTsxPath = path.join(newClientRepoPath, 'src', 'App.tsx');
+                await fs.writeFile(pageTsxPath, generatedCode);
 
-            // CRITICAL: Step 2: Delete the .git folder from the cloned boilerplate
-            // This is vital to make it a clean, unversioned copy of the boilerplate *contents*.
-            const dotGitPath = path.join(newClientRepoPath, '.git');
-            if (await fs.stat(dotGitPath).catch(() => null)) { // Check if .git exists
-                await fs.rm(dotGitPath, { recursive: true, force: true });
-                console.log(`[${pageId}] Removed .git folder from cloned boilerplate.`);
-            }
-            
-            // CRITICAL: Step 3: Initialize a *Brand New, Empty Git Repository* in the same path
-            // This initializes a new repo that *already contains* the boilerplate files.
-            console.log(`[${pageId}] Initializing new git repo at ${newClientRepoPath}`);
-            const newRepoGit = simpleGit({ baseDir: newClientRepoPath }); // newRepoGit operates on the client's repo
-            await newRepoGit.init();
-            await newRepoGit.addConfig('user.name', githubUsername);
-            await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
-            
-            // Step 4: Overwrite the main page.tsx with AI-generated code (within the newly initialized repo)
-            const pageTsxPath = path.join(newClientRepoPath, 'src', 'App.tsx');
-            console.log(`[${pageId}] Writing AI-generated code to: ${pageTsxPath}`);
-            await fs.writeFile(pageTsxPath, generatedCode);
-            console.log(`[${pageId}] Injected AI-generated code into page.tsx.`);
+                await newRepoGit.add('.');
+                await newRepoGit.checkoutLocalBranch(boilerplateRepoBranch);
+                await newRepoGit.commit('feat: AI generated initial landing page code');
 
-            // CRITICAL: Step 5: Add all files (including those copied from boilerplate) to the new repo's staging area and commit
-            await newRepoGit.add('.'); // Stage ALL files in the new repo
-            console.log(`[${pageId}] Added files for commit.`);
-            // CRITICAL: Ensure the branch exists and is checked out before commit/push
-            await newRepoGit.checkoutLocalBranch(boilerplateRepoBranch); // Explicitly create/checkout the branch
-            console.log(`[${pageId}] Checked out branch: ${boilerplateRepoBranch}.`);
-            await newRepoGit.commit('feat: AI generated initial landing page code');
-            console.log(`[${pageId}] Committed to local repo.`);
-
-            // Step 6: Add remote origin and push from the NEWLY INITIALIZED REPO
-            const authenticatedNewRepoUrl = `https://${githubUsername}:${githubPat}@github.com/${githubUsername}/${repoSlug}.git`;
-            await newRepoGit.addRemote('origin', authenticatedNewRepoUrl);
-            console.log(`[${pageId}] Added new 'origin' remote pointing to ${repoSlug}.`);
-            
-            console.log(`[${pageId}] Attempting to push code to: ${authenticatedNewRepoUrl}`);
-            // Push to the newly defined origin, on the explicitly created branch
-            await newRepoGit.push('origin', boilerplateRepoBranch); 
-            console.log(`[${pageId}] Pushed AI-generated code to new GitHub repo successfully.`);
-            // >>>>> FIX END <<<<<
+                const authenticatedNewRepoUrl = `https://${githubUsername}:${githubPat}@github.com/${githubUsername}/${repoSlug}.git`;
+                await newRepoGit.addRemote('origin', authenticatedNewRepoUrl);
+                await newRepoGit.push('origin', boilerplateRepoBranch); 
+                console.log(`[${pageId}] Pushed AI-generated code to new GitHub repo successfully.`);
 
             } catch (gitOpErr) {
                 console.error(`[${pageId}] ERROR during repo setup or git operations:`, gitOpErr.message);
-                if (gitOpErr.stdout) console.error(`[${pageId}] Git stdout (detail):`, gitOpErr.stdout.toString());
-                if (gitOpErr.stderr) console.error(`[${pageId}] Git stderr (detail):`, gitOpErr.stderr.toString());
                 throw new Error(`Failed to setup repo and push code: ${gitOpErr.message}`);
             }
 
@@ -491,14 +511,12 @@ Description for the landing page: "${prompt}"
                     type: 'github',
                     repo: `${githubUsername}/${repoSlug}`,
                 },
-                installCommand: 'npm install', // Standard Next.js
-                buildCommand: 'npm run build', // Standard Next.js
-                outputDirectory: 'dist', // Vite's default output directory
-                framework: 'vite', // Tell Vercel it's a Vite project!
-                // public: false, // REMOVE THIS LINE ENTIRELY
+                installCommand: 'npm install',
+                buildCommand: 'npm run build',
+                outputDirectory: 'dist',
+                framework: 'vite',
             };
 
-            console.log(`[${pageId}] Calling Vercel API to create project: ${repoSlug}`);
             const vercelProject = await callVercelApi(
                 `/v9/projects${vercelTeamId ? `?teamId=${vercelTeamId}` : ''}`,
                 'POST',
@@ -508,15 +526,14 @@ Description for the landing page: "${prompt}"
             console.log(`[${pageId}] Vercel Project created with ID: ${vercelProjectId}`);
 
             // 6. Add Custom Domain (Subdomain)
-            const subdomain = repoSlug; // Use the repo name as subdomain for simplicity
+            const subdomain = repoSlug;
             const fullDomain = `${subdomain}.${vercelDomain}`;
 
             const addDomainBody = {
                 domain: fullDomain,
-                name: fullDomain, // <-- CRITICAL FIX: Add the 'name' property, which is the domain itself
+                name: fullDomain,
             };
 
-            console.log(`[${pageId}] Calling Vercel API to add domain: ${fullDomain} to project ${vercelProjectId}`);
             await callVercelApi(
                 `/v9/projects/${vercelProjectId}/domains${vercelTeamId ? `?teamId=${vercelTeamId}` : ''}`,
                 'POST',
@@ -524,77 +541,40 @@ Description for the landing page: "${prompt}"
             );
             console.log(`[${pageId}] Added custom domain: ${fullDomain}`);
 
-            // 6. Add Custom Domain (Subdomain)
-            // ... (existing code for adding domain)
-            console.log(`[${pageId}] Added custom domain: ${fullDomain}`);
+            // Programmatic Commit to Trigger Vercel
+            await new Promise(resolve => setTimeout(resolve, 5000));
 
-            // >>>>> FIX START (Programmatic Commit to Trigger Vercel - with delay) <<<<<
-            // Vercel requires a new commit to trigger a build after project creation and domain adding.
-            // We'll perform a small, innocuous commit to the newly created repo.
-
-            console.log(`[${pageId}] Delaying final commit to ensure Vercel repo indexing...`);
-            // Add a short delay (e.g., 5 seconds) to give Vercel time to register the new repo's first commit
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 7 seconds - change later
-
-            console.log(`[${pageId}] Performing a final commit to trigger Vercel deployment...`);
-            
-            // Get the git instance for the new client repo
             const newRepoGit = simpleGit({ baseDir: newClientRepoPath });
-
-            // Create or update a README.md file
             const readmePath = path.join(newClientRepoPath, 'README.md');
-            const readmeContent = `# AI Generated Landing Page\n\nGenerated by AI Page Factory on ${new Date().toISOString()} (ID: ${pageId})\n\nThis project was automatically generated from your prompt.`;
-            
+            const readmeContent = `# AI Generated Landing Page\n\nGenerated on ${new Date().toISOString()} (ID: ${pageId})`;
             await fs.writeFile(readmePath, readmeContent);
-            console.log(`[${pageId}] Updated README.md.`);
-
-            // Add the README.md to staging
             await newRepoGit.add(readmePath);
-            console.log(`[${pageId}] Added README.md to staging.`);
-
-            // Commit the README.md change
-            await newRepoGit.commit('chore: Trigger Vercel deployment with README update');
-            console.log(`[${pageId}] Committed README update.`);
-
-            // Push the README.md commit to GitHub (this will trigger Vercel!)
-            const authenticatedNewRepoUrl = `https://${githubUsername}:${githubPat}@github.com/${githubUsername}/${repoSlug}.git`;
-            // Ensure origin is set correctly just before push, in case it was modified
-            await newRepoGit.addRemote('origin', authenticatedNewRepoUrl).catch(() => {}); // Add or update remote
-            console.log(`[${pageId}] Re-confirming remote for final push.`);
-
+            await newRepoGit.commit('chore: Trigger Vercel deployment');
             await newRepoGit.push('origin', boilerplateRepoBranch); 
             console.log(`[${pageId}] Pushed README update to trigger Vercel successfully.`);
-            // >>>>> FIX END <<<<<
 
             // 7. Wait for Deployment to be READY
             let deploymentReady = false;
             let retries = 0;
-            const maxRetries = 40; // Max 40 * 5s = 200 seconds (approx 3.3 minutes)
+            const maxRetries = 40;
             console.log(`[${pageId}] Waiting for Vercel deployment of project ${vercelProjectId} to be READY...`);
 
             while (!deploymentReady && retries < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 const deployments = await callVercelApi(
                     `/v6/deployments?projectId=${vercelProjectId}${vercelTeamId ? `&teamId=${vercelTeamId}` : ''}`
                 );
-                const latestDeployment = deployments.deployments[0]; // Get the most recent deployment
+                const latestDeployment = deployments.deployments[0];
 
                 if (latestDeployment) {
                     vercelDeploymentId = latestDeployment.uid;
-                    console.log(`[${pageId}] Latest Vercel deployment status for ${vercelProjectId}: ${latestDeployment.state}`);
                     if (latestDeployment.state === 'READY' || latestDeployment.state === 'ERROR' || latestDeployment.state === 'CANCELED') {
                         deploymentReady = true;
                         if (latestDeployment.state === 'READY') {
-                            deployedUrl = `https://${fullDomain}`; // Use the custom domain
+                            deployedUrl = `https://${fullDomain}`;
                             console.log(`[${pageId}] Deployment READY! Final URL: ${deployedUrl}`);
                         } else {
-                            // If build fails, try to fetch build logs from Vercel to help debug
-                            let buildLogsUrl = `https://vercel.com/${githubUsername}/${repoSlug}/deployments/${latestDeployment.uid}`; // Assuming public project if you want direct link
-                            if (vercelTeamId) {
-                                buildLogsUrl = `https://vercel.com/${vercelTeamId}/${repoSlug}/deployments/${latestDeployment.uid}`;
-                            }
-                            console.error(`[${pageId}] Vercel deployment FAILED! Check logs at: ${buildLogsUrl}`);
-                            throw new Error(`Vercel deployment failed with status: ${latestDeployment.state}. See Vercel logs.`);
+                            throw new Error(`Vercel deployment failed with status: ${latestDeployment.state}.`);
                         }
                     }
                 }
@@ -605,7 +585,7 @@ Description for the landing page: "${prompt}"
                 throw new Error('Vercel deployment timed out or failed to find URL.');
             }
 
-            // 8. Update Supabase record (status: deployed, add URL/IDs)
+            // 8. Update Supabase record
             await supabase.from('generated_pages').update({
                 status: 'deployed',
                 deployed_url: deployedUrl,
@@ -619,11 +599,10 @@ Description for the landing page: "${prompt}"
             console.error(`[${pageId}] Full generation/deployment process FAILED unexpectedly:`, error);
             await supabase.from('generated_pages').update({
                 status: 'failed',
-                message: error.message || 'Unknown error during deployment process. Check orchestrator logs.'
+                message: error.message || 'Unknown error during deployment process.'
             }).eq('id', pageId);
         } finally {
-            // Clean up temporary directory (important for Cloud Run ephemeral storage)
-            if (tempDir && fs.rm) { // Check if tempDir was created and fs.rm exists
+            if (tempDir && fs.rm) {
                 await fs.rm(tempDir, { recursive: true, force: true }).catch(err => console.error(`[${pageId}] Failed to clean up temp dir ${tempDir}:`, err));
                 console.log(`[${pageId}] Cleaned up temporary directory: ${tempDir}`);
             }
@@ -655,6 +634,8 @@ app.get('/status/:id', async (req, res) => {
 app.get('/', (req, res) => {
     res.send('AI Page Factory Backend Orchestrator is running!');
 });
+
+// ... all the code before this ...
 
 app.listen(port, () => {
     console.log(`Orchestrator listening on port ${port}`);

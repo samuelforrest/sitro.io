@@ -434,7 +434,7 @@ Description for the landing page: "${prompt}"
             console.log(`[${pageId}] Status updated to creating_repo.`);
             const createRepoBody = {
                 name: repoSlug,
-                private: true,
+                private: false,
                 description: `Sitro.io AI-Generated Landing Page for prompt: "${prompt.substring(0, Math.min(prompt.length, 100)).replace(/\s+/g, ' ').trim()}"`,
                 auto_init: false,
             };

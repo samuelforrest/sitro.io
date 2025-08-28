@@ -47,7 +47,7 @@ export default function Mission() {
               />
             </div>
             <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Sitro.ai
+              Sitro.io
             </span>
           </div>
           

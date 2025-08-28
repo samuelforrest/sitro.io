@@ -347,9 +347,9 @@ export default function Home() {
                 <Button
                   onClick={handleQuickCreate}
                   disabled={!promptText.trim() || isSubmittingPrompt || !disclaimerChecked}
-                  className="absolute right-2 top-2 h-10 w-10 min-h-10 min-w-10 p-0 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg transition-colors duration-200"
+                  className="absolute right-2 top-2 w-10 h-10 p-0 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg transition-colors duration-200 flex items-center justify-center"
                 >
-                  {isSubmittingPrompt ? <Clock className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                  {isSubmittingPrompt ? <Clock className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 text-white" />}
                 </Button>
               </div>
               {promptError && <p className="text-red-500 text-sm mt-3">{promptError}</p>}

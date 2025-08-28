@@ -251,7 +251,7 @@ function GenerateContent() {
             disabled={isLoading}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl px-8 py-3 font-semibold shadow-lg"
           >
-            Generate Again
+            Generate Again.
           </Button>
         </div>
       )}

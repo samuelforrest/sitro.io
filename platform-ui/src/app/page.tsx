@@ -367,7 +367,7 @@ export default function Home() {
               {!isSubmittingPrompt && !promptError && (
                   <p className="text-sm mt-3 flex items-center justify-center text-gray-500">
                       <Zap className="w-4 h-4 mr-1 text-yellow-500" />
-                      Your website will be ready in 46 seconds
+                      Your website will be ready in 94 seconds
                   </p>
               )}
             </div>
@@ -395,7 +395,7 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-2">
               <Check className="w-4 h-4 text-green-500" />
-              <span>Live in 46 seconds</span>
+              <span>Live in 94 seconds</span>
             </div>
             <div className="flex items-center space-x-2">
               <Check className="w-4 h-4 text-green-500" />

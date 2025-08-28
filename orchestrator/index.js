@@ -586,6 +586,30 @@ Description for the landing page: "${prompt}"
                 throw new Error('Vercel deployment timed out or failed to find URL.');
             }
 
+            // --- NEW STEP 8: UPDATE GITHUB REPO WITH LIVE URL ---
+            console.log(`[${pageId}] Updating GitHub repo with live URL: ${deployedUrl}`);
+            try {
+                const newDescription = `AI-Generated Landing Page from prompt. Live site: ${deployedUrl}`;
+                const updateRepoBody = {
+                    description: newDescription,
+                    homepage: deployedUrl, // This adds the website link to the repo's "About" section
+                };
+
+                const githubUpdateResponse = await fetch(`https://api.github.com/repos/${githubUsername}/${repoSlug}`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `token ${githubPat}`, 'Content-Type': 'application/json', 'User-Agent': githubUsername, 'Accept': 'application/vnd.github.v3+json' },
+                    body: JSON.stringify(updateRepoBody),
+                });
+
+                if (!githubUpdateResponse.ok) {
+                    console.warn(`[${pageId}] WARNING: Failed to update GitHub repo. Status: ${githubUpdateResponse.status} - ${await githubUpdateResponse.text()}`);
+                } else {
+                    console.log(`[${pageId}] Successfully updated GitHub repository homepage and description.`);
+                }
+            } catch (githubUpdateErr) {
+                console.warn(`[${pageId}] WARNING: An error occurred while trying to update the GitHub repo:`, githubUpdateErr.message);
+            }
+
             // 8. Update Supabase record
             await supabase.from('generated_pages').update({
                 status: 'deployed',

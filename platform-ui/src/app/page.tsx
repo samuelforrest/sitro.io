@@ -303,9 +303,9 @@ export default function Home() {
 
       <section className="px-6 py-20 bg-white">
         <div className="max-w-6xl mx-auto text-center">
-          <div className="hidden md:inline-flex items-center space-x-2 rounded-full px-6 py-2 mb-8 border bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white transition-all duration-300 transform hover:scale-105">
+          <div className="hidden md:inline-flex items-center space-x-2 rounded-full px-6 py-2 mb-8 border bg-gradient-to-r from-blue-600 to-orange-800 text-white transition-all duration-300 transform hover:scale-105">
             <Crown className="w-4 h-4" />
-            <span className="font-semibold text-sm">AI-Generated Landing Pages</span>
+            <span className="font-semibold text-sm">Supercharged by ChatGPT</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight tracking-tight animate-fade-in">
@@ -506,10 +506,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Loved by 50,000+ Creators
+              Loved by vibe-creators
             </h2>
             <p className="text-xl max-w-3xl mx-auto font-medium text-gray-600">
-              From freelancers to famous companies, see why everyone chooses Jymo.ai for their landing pages. Even we use it.
+              From freelancers to students, see why everyone chooses sitro.io for their landing pages. Even we use it.
             </p>
           </div>
           

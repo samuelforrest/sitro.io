@@ -19,6 +19,7 @@ import {
   Clock,
   Mail
 } from "lucide-react";
+import Link from "next/link";
 import { FaTwitter, FaGithub, FaLinkedin } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
@@ -380,6 +381,14 @@ export default function Home() {
             >
               Start from Template
             </Button>
+            <Link href="https://quantumfit.sitro.io" target="_blank" rel="noopener noreferrer">
+              <Button 
+                variant="outline"
+                className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl px-8 py-3 font-semibold transition-colors duration-200 shadow-lg ml-10"
+              >
+                View Example Website
+              </Button>
+            </Link>
           </div>
           
           <div className="text-sm flex flex-wrap items-center justify-center gap-8 text-gray-500">
@@ -403,7 +412,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Why Choose Sitro.io?
+              Why People Choose Sitro.io?
             </h2>
             <p className="hidden md:block text-xl max-w-3xl mx-auto font-medium text-gray-600">
               Fast AI generation speeds and search engine optimisation

@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useEffect, useMemo } from "react";
@@ -12,14 +11,12 @@ import {
   ArrowRight, 
   Zap, 
   Globe, 
-  Palette, 
   Crown, 
   Check, 
   Sparkles, 
   Send, 
   Star,
   Clock,
-  Shield,
   Mail
 } from "lucide-react";
 import { FaTwitter, FaGithub, FaLinkedin } from "react-icons/fa";
@@ -215,15 +212,15 @@ export default function Home() {
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
               <Image 
-                src="/juxalogo.png" 
+                src="/sitrologo.webp" 
                 alt="Juxa.io Logo" 
-                width={40} 
-                height={40} 
+                width={1024} 
+                height={1024} 
                 className="w-full h-full object-contain"
               />
             </div>
             <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Sitro.ai
+              Sitro.io
             </span>
           </div>
           
@@ -397,29 +394,20 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Why Choose Jymo.ai?
+              Why Choose Sitro.io?
             </h2>
             <p className="hidden md:block text-xl max-w-3xl mx-auto font-medium text-gray-600">
-              From lightning fast AI generation to smart SEO and security
+              Fast AI generation speeds and search engine optimisation
             </p>
           </div>
           
-          <div className="grid grid-cols-2 gap-4 md:hidden">
+          <div className="grid grid-cols-3 gap-4 md:hidden">
             <Card className="border-2 bg-white border-gray-100 hover:shadow-lg transition-all duration-300 rounded-xl">
               <CardContent className="p-4 text-center">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-sm font-bold">AI Generation</h3>
-              </CardContent>
-            </Card>
-            
-            <Card className="border-2 bg-white border-gray-100 hover:shadow-lg transition-all duration-300 rounded-xl">
-              <CardContent className="p-4 text-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <Palette className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="text-sm font-bold">Designer Quality</h3>
+                <h3 className="text-sm font-bold">Fast AI Generation</h3>
               </CardContent>
             </Card>
 
@@ -435,42 +423,34 @@ export default function Home() {
             <Card className="border-2 bg-white border-gray-100 hover:shadow-lg transition-all duration-300 rounded-xl">
               <CardContent className="p-4 text-center">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <Shield className="w-5 h-5 text-white" />
+                  <Star className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-sm font-bold">Secure & Fast</h3>
+                <h3 className="text-sm font-bold">Smart SEO by default</h3>
               </CardContent>
             </Card>
           </div>
 
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2 border-2 bg-gradient-to-br from-blue-600 to-purple-700 text-white hover:shadow-2xl transition-all duration-300 rounded-2xl transform hover:scale-105 hover:-translate-y-2">
-              <CardContent className="p-6 md:p-10">
-                <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <Zap className="w-8 h-8 md:w-10 md:h-10 text-white" />
-                  </div>
-                  <div className="text-center md:text-left">
-                    <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-4">Lightning-Fast AI Generation</h3>
-                    <p className="text-lg leading-relaxed text-blue-100 mb-4">
-                      Our cutting-edge AI doesn&apos;t just create websites—it crafts experiences. From understanding your vision to incorporating your images, everything happens in under 30 seconds.
-                    </p>
-                    <div className="flex items-center text-white">
-                      <Clock className="w-5 h-5 mr-2" />
-                      <span className="font-semibold">Average generation time: 46 seconds</span>
-                    </div>
-                  </div>
+            <Card className="border-2 bg-white border-gray-100 hover:border-blue-600 hover:shadow-xl transition-all duration-300 rounded-2xl transform hover:scale-105 hover:-translate-y-2">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Zap className="w-8 h-8 text-white" />
                 </div>
+                <h3 className="text-xl font-bold mb-4">One-Click Publishing</h3>
+                <p className="leading-relaxed text-gray-600">
+                  No hosting headaches, no domain setup stress. Your site goes live <b>instantly</b> after generation.
+                </p>
               </CardContent>
             </Card>
-            
-            <Card className="border-2 bg-white border-gray-100 hover:border-purple-200 hover:shadow-xl transition-all duration-300 rounded-2xl transform hover:scale-105 hover:-translate-y-2">
+
+            <Card className="border-2 bg-gradient-to-br from-yellow-400 to-orange-500 text-white hover:shadow-xl transition-all duration-300 rounded-2xl transform hover:scale-105 hover:-translate-y-2">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <Palette className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Star className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-4">Designer-Quality Aesthetics</h3>
-                <p className="leading-relaxed text-gray-600">
-                  Our AI is capable of crafting websites better than the quality of top designers.
+                <h3 className="text-xl font-bold mb-4">Smart SEO Optimization</h3>
+                <p className="leading-relaxed text-white">
+                  Your landing page will come with built in search engine optimizations, inclduing Meta tags and structured data, ensuring you rank high on Google.
                 </p>
               </CardContent>
             </Card>
@@ -487,47 +467,21 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 bg-white border-gray-100 hover:border-orange-200 hover:shadow-xl transition-all duration-300 rounded-2xl transform hover:scale-105 hover:-translate-y-2">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <Shield className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold mb-4">Enterprise-Grade Security</h3>
-                <p className="leading-relaxed text-gray-600">
-                  Bank-level encryption, DDoS protection, and 99.9% uptime guarantee. Your business deserves bulletproof reliability.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 bg-gradient-to-br from-yellow-400 to-orange-500 text-white hover:shadow-xl transition-all duration-300 rounded-2xl transform hover:scale-105 hover:-translate-y-2">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <Star className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold mb-4">Smart SEO Optimization</h3>
-                <p className="leading-relaxed text-white">
-                  Built-in SEO magic that gets you ranking higher. Meta tags, structured data, and performance optimization—all automatic.
-                </p>
-              </CardContent>
-            </Card>
+            
           </div>
           
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="mt-16 grid grid-cols-3 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-black text-blue-600 mb-2">50K+</div>
+              <div className="text-3xl md:text-4xl font-black text-blue-600 mb-2">500</div>
               <div className="text-gray-600 font-medium">Websites Created</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-black text-purple-600 mb-2">46s</div>
-              <div className="text-gray-600 font-medium">Average Build Time</div>
+              <div className="text-3xl md:text-4xl font-black text-purple-600 mb-2">94s</div>
+              <div className="text-gray-600 font-medium">Average creation time</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-black text-emerald-600 mb-2">99.9%</div>
-              <div className="text-gray-600 font-medium">Uptime Guarantee</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-black text-orange-600 mb-2">24/7</div>
-              <div className="text-gray-600 font-medium">AI Support Available</div>
+              <div className="text-3xl md:text-4xl font-black text-teal-600 mb-2">99.8%</div>
+              <div className="text-gray-600 font-medium">Average uptime</div>
             </div>
           </div>
         </div>

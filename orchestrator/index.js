@@ -507,7 +507,7 @@ You must build the page using only the components and rules defined below.
                 },
                 installCommand: 'npm install',
                 buildCommand: 'npm run build',
-                outputDirectory: 'dist',
+                
                 framework: 'nextjs',
             };
 

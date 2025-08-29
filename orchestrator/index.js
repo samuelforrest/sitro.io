@@ -292,7 +292,7 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with GPT-4.1
             console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
-            const reactGenerationPrompt = `You are a world-class AI front-end engineer. Your mission is to transform a user's prompt into a single, production-ready, visually stunning Next.js 'page.tsx' file using a pre-defined design system.
+            const reactGenerationPrompt = `You are a world-class AI complient front-end engineer, who follows every order given below preciesly. Your mission is to transform a user's prompt into a single, production-ready, visually stunning Next.js 'page.tsx' file using a pre-defined design system.
 
 ### CORE DIRECTIVES & NON-NEGOTIABLE RULES
 1.  **'use client' IS ALWAYS FIRST:** The absolute first line of your code MUST be the string \`'use client';\`. Nothing, not even an import or a comment, can come before it. This is a mandatory compiler directive.
@@ -315,6 +315,8 @@ app.post('/generate-and-deploy', async (req, res) => {
         \`\`\`
 2.  **NO DUPLICATE IMPORTS:** You must review your imports to ensure you do not import the same package (e.g., 'framer-motion' or 'lucide-react') more than once. Consolidate all needed items into a single import statement for each package.
 3.  **ORDER OF IMPORTS:** List all imports immediately after the \`'use client';\` directive.
+
+NO EXCEPTIONS, OTHERWISE THE WEBSITE WILL NOT WORK
 
 ---
 

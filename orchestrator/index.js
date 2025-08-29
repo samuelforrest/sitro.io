@@ -292,58 +292,73 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with GPT-4.1
             console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
-            const reactGenerationPrompt = `You are an expert React TypeScript developer specialized in creating modern, performant, and visually appealing landing pages with Tailwind CSS and Framer Motion. Your task is to generate a single React TypeScript functional component named LandingPage based on the user's detailed description. This component will be used in a Next.js App Router project.
+            const reactGenerationPrompt = `You are an elite AI developer specializing in creating single-file, server-rendered landing pages for the Next.js App Router. Your toolkit includes Tailwind CSS for styling, Framer Motion for animations, and a pre-configured shadcn/ui component library. Your goal is to interpret a user's prompt and build a visually stunning, responsive, and complete landing page component.
 
-OUTPUT INSTRUCTIONS (STRICT):
-- Generate ONLY the complete and valid TypeScript React functional component code.
-- The component MUST be named LandingPage.
-- Start your output DIRECTLY with: const LandingPage: React.FC = () => {
-- The very last line of your output MUST be: export default LandingPage;
-- DO NOT include any conversation, markdown formatting, or external imports (e.g., useState, useEffect, or other libraries beyond basic React/Framer Motion types).
-- DO NOT include use client; or Framer Motion imports in your output; these are handled externally.
-- DO NOT include tailwind.config.js or script tags.
-- Ensure all styling uses Tailwind CSS utility classes directly within JSX. No inline style objects or separate CSS files.
-- Ensure full responsiveness using Tailwind's prefixes (e.g., md:text-lg, lg:flex).
+### STRICT OUTPUT RULES
+1.  **Code Only:** Your entire output must be ONLY the TypeScript code for the React component. Do not include any markdown like \`\`\`tsx, explanations, or conversational text.
+2.  **Single File:** All code must be in a single file. The component must be the default export. Example: 'export default function LandingPage() { ... }'.
+3.  **Imports First:** The code must start directly with all necessary import statements.
+4.  **No 'use client' unless essential:** Only add the 'use client;' directive if you are using interactive Framer Motion animations (like 'whileHover') or React hooks ('useState', 'useEffect'). For simple entrance animations ('initial', 'whileInView'), 'use client' is NOT needed and should be omitted for better performance.
 
-DESIGN & STRUCTURE GUIDANCE:
-- Theme & Style: Unless the user's prompt explicitly specifies a theme (e.g., dark, light, minimalist, retro) or specific colors, default to an Animated, Cool, Dark AI Tech Startup aesthetic. This includes:
-    - Color Palette (Default): Deep, dark backgrounds (e.g., very dark blue, charcoal) with a few vibrant gradients which look good, or appropriate accent colours.
-    - DO NOT give buttons gradients, or text gradients, only backgrounds may have limited use of gradients.
-- Animations (Strategic Framer Motion Use): Implement dynamic, visually engaging animations. Focus on key elements like:
-    - Hero Section: Primary entrance animations (fade-in, slide-up) for headline, text, and CTA.
-    - Key Sections: Subtle animations (fade-in, scale, slide) when sections enter the viewport (whileInView).
-    - Interactive Elements: Clear hover and tap effects for buttons and links.
-    - Background: Minimal, subtle continuous background animations (e.g., gentle pulsing, animated gradients).
-    - Easing: For transition properties, use cubic bezier arrays (e.g., [0.25, 0.1, 0.25, 1] for ease-out, [0.42, 0, 0.58, 1] for ease-in-out) or the string literal linear.
+---
 
-ESSENTIAL PAGE SECTIONS:
-- Fixed/Sticky Header (Navbar):
-    - Contain a prominent brand/logo (text or simple SVG placeholder).
-    - Navigation links (Home, Features, About, Testimonials, Contact) that link to sections using id anchors.
-    - Responsive hamburger menu structure for mobile (no JS logic for toggle; use Tailwind classes for hidden/shown states).
-- Main Content Sections (Each MUST have a unique id for navigation):
-    - Hero Section (id="hero" or id="home"): Strong headline, engaging sub-text, prominent Call-to-Action.
-    - Features/Services Section(s) (id="features"): Highlight offerings.
-    - About Us/Mission Section (id="about"): Explain purpose.
-    - Testimonials/Social Proof Section (id="testimonials"): Display client feedback.
-    - Call-to-Action Section (id="cta"): Final engagement push.
-    - Contact Section (id="contact"): Contact details/form.
-- Comprehensive Footer:
-    - Copyright information.
-    - Quick links.
-    - Social media icons/links (use placeholder SVG/text).
+### DESIGN & TOOLKIT GUIDE
 
-CONTENT & BEST PRACTICES:
-- Generate detailed, compelling, and benefit-driven placeholder content matching the business theme.
-- Ensure consistent spacing using Tailwind classes.
-- Create clear visual separation between sections using distinct padding values and subtle background variations.
-- Employ modern layouts (grid, flex).
-- Ensure all interactive elements have clear hover and focus states.
-- Generate clean, efficient, and concise code.
+You have a powerful toolkit available. You MUST import components before using them.
 
-Limit output to around 11,500 tokens.
+#### 1. Font Selection (Choose ONE per page)
+Apply one of these Tailwind CSS classes to the main parent container to set the global typography. Default to 'font-sans' if unsure.
+-   **Modern/Default:** \`className="font-sans"\` (Uses 'Inter' font)
+-   **Elegant/Traditional:** \`className="font-serif"\` (Uses 'Lora' font)
+-   **Techy/Futuristic:** \`className="font-mono"\` (Uses 'Roboto Mono' font)
+-   *Example:* \`<main className="font-sans bg-slate-900 text-white">\`
 
-Description for the landing page: "${prompt}"
+#### 2. Component Library: shadcn/ui
+You MUST import components from their exact paths.
+
+**Layout & Structure:**
+-   **Card:** For grouping content.
+    -   Import: \`import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";\`
+-   **Accordion:** For collapsible FAQ sections.
+    -   Import: \`import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";\`
+-   **Tabs:** For switching between content panels.
+    -   Import: \`import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";\`
+
+**Navigation & Actions:**
+-   **Button:** For calls to action.
+    -   Import: \`import { Button } from "@/components/ui/button";\`
+-   **Navigation Menu:** For the main site header.
+    -   Import: \`import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";\`
+-   **Dialog:** For modal popups.
+    -   Import: \`import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";\`
+
+**Forms & Input:**
+-   **Input:** For text fields.
+    -   Import: \`import { Input } from "@/components/ui/input";\`
+-   **Label:** To label form fields.
+    -   Import: \`import { Label } from "@/components/ui/label";\`
+-   **Textarea:** For multi-line text input.
+    -   Import: \`import { Textarea } from "@/components/ui/textarea";\`
+
+**Data Display:**
+-   **Avatar:** For testimonials or team sections.
+    -   Import: \`import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";\`
+-   **Badge:** To highlight features or status.
+    -   Import: \`import { Badge } from "@/components/ui/badge";\`
+-   **Alert:** For important notices.
+    -   Import: \`import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";\`
+
+#### 3. Animations: Framer Motion
+-   Import: \`import { motion } from "framer-motion";\`
+-   Use \`<motion.div>\` for animated elements.
+-   Animate elements into view: \`<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>...</motion.div>\`
+
+---
+
+### FINAL TASK
+Generate a complete, single-file landing page component based on the following user prompt. Ensure you create detailed, compelling, and benefit-driven placeholder content that matches the business theme described.
+
+**User Prompt:** "${prompt}"
 `;
 
             let generatedCodeRaw;
@@ -485,7 +500,7 @@ Description for the landing page: "${prompt}"
                 await newRepoGit.addConfig('user.name', githubUsername);
                 await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
                 
-                const pageTsxPath = path.join(newClientRepoPath, 'src', 'App.tsx');
+                const pageTsxPath = path.join(newClientRepoPath, 'src', 'app', 'page.tsx');
                 await fs.writeFile(pageTsxPath, generatedCode);
 
                 await newRepoGit.add('.');
@@ -515,7 +530,7 @@ Description for the landing page: "${prompt}"
                 installCommand: 'npm install',
                 buildCommand: 'npm run build',
                 outputDirectory: 'dist',
-                framework: 'vite',
+                framework: 'nextjs',
             };
 
             const vercelProject = await callVercelApi(

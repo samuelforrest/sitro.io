@@ -295,12 +295,11 @@ app.post('/generate-and-deploy', async (req, res) => {
             const reactGenerationPrompt = `You are a world-class AI front-end engineer. Your mission is to transform a user's prompt into a single, production-ready, visually stunning Next.js 'page.tsx' file using a pre-defined design system.
 
 ### STRICT OUTPUT RULES (NON-NEGOTIABLE)
-1.  **CODE ONLY:** Your entire output must be ONLY the TypeScript code. Do not include markdown like \`\`\`tsx, explanations, or any conversational text.
-2.  **COMPONENT NAMING:** The component MUST be a single functional component named exactly \`LandingPage\`.
-3.  **COMPONENT STRUCTURE:** The component definition MUST follow this exact structure: \`const LandingPage: React.FC = () => { ... };\`
+1.  **'use client' DIRECTIVE:** The absolute first line of your code MUST be \`'use client';\` because this component uses Framer Motion for animations. This is a mandatory requirement for interactivity.
+2.  **CODE ONLY:** After the 'use client' directive, your entire output must be ONLY the TypeScript code. Do not include markdown like \`\`\`tsx, explanations, or any conversational text.
+3.  **COMPONENT NAMING & STRUCTURE:** The component MUST be a single functional component named exactly \`LandingPage\`, defined with the structure: \`const LandingPage: React.FC = () => { ... };\`
 4.  **DEFAULT EXPORT:** The final, absolute last line of your code MUST be exactly: \`export default LandingPage;\`
-5.  **IMPORTS FIRST:** Your code must start directly with all necessary import statements.
-6.  **'use client' SPARINGLY:** Only add the \`'use client';\` directive if using interactive animations ('whileHover') or React hooks ('useState'). For simple entrance animations ('initial', 'whileInView'), 'use client' MUST be omitted for better performance.
+5.  **IMPORTS FIRST:** Your code must start with all necessary import statements immediately after the 'use client' directive.
 
 ---
 

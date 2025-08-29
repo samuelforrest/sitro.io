@@ -486,7 +486,7 @@ Apply ONE of these classes to the root \`<main>\` tag.
                 await fs.mkdir(tempDir, { recursive: true });
 
                 const gitForClone = simpleGit();
-                await gitForClone.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/vite-react-tailwind-boilerplate.git`, newClientRepoPath, ['--branch', boilerplateRepoBranch]);
+                await gitForClone.clone(`https://${githubUsername}:${githubPat}@github.com/${githubUsername}/sitro-nextjs-boilerplate.git`, newClientRepoPath, ['--branch', boilerplateRepoBranch]);
                 
                 const dotGitPath = path.join(newClientRepoPath, '.git');
                 if (await fs.stat(dotGitPath).catch(() => null)) {

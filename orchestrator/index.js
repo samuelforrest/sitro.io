@@ -292,38 +292,26 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with GPT-4.1
             console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
-            const reactGenerationPrompt = `Generate EXACTLY ONE tsx code block for a Next.js page.tsx file. Do not generate multiple code blocks or examples.
+            const reactGenerationPrompt = `Return this exact structure filled with content for: ${prompt}
 
-Your response must start immediately with this exact structure:
-
-\`\`\`tsx
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { [ICONS_HERE] } from 'lucide-react';
+import { [FILL_ICONS] } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const LandingPage: React.FC = () => {
   return (
     <main className="font-sans">
-      {/* content */}
+      [FILL_CONTENT]
     </main>
   );
 };
 
 export default LandingPage;
-\`\`\`
 
-CRITICAL: 
-- Generate ONLY ONE code block
-- First line must be 'use client';
-- No text before the code block
-- No example code blocks
-- Use &apos; for apostrophes in JSX
-- Use &quot; for quotes in JSX
-
-Task: ${prompt}`;
+Replace [FILL_ICONS] and [FILL_CONTENT] appropriately. Use &apos; and &quot; in JSX.`;
 
             let generatedCodeRaw;
             try {

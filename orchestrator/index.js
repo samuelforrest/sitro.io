@@ -292,71 +292,69 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with GPT-4.1
             console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
-            const reactGenerationPrompt = `You are an elite AI developer specializing in creating single-file, server-rendered landing pages for the Next.js App Router. Your toolkit includes Tailwind CSS for styling, Framer Motion for animations, and a pre-configured shadcn/ui component library. Your goal is to interpret a user's prompt and build a visually stunning, responsive, and complete landing page component.
+            const reactGenerationPrompt = `You are a world-class AI front-end engineer. Your mission is to transform a user's prompt into a single, production-ready, visually stunning Next.js 'page.tsx' file using a pre-defined design system.
 
-### STRICT OUTPUT RULES
-1.  **Code Only:** Your entire output must be ONLY the TypeScript code for the React component. Do not include any markdown like \`\`\`tsx, explanations, or conversational text.
-2.  **Single File:** All code must be in a single file. The component must be the default export. Example: 'export default function LandingPage() { ... }'.
-3.  **Imports First:** The code must start directly with all necessary import statements.
-4.  **No 'use client' unless essential:** Only add the 'use client;' directive if you are using interactive Framer Motion animations (like 'whileHover') or React hooks ('useState', 'useEffect'). For simple entrance animations ('initial', 'whileInView'), 'use client' is NOT needed and should be omitted for better performance.
+### STRICT OUTPUT RULES (NON-NEGOTIABLE)
+1.  **CODE ONLY:** Your entire output must be ONLY the TypeScript code. Do not include markdown like \`\`\`tsx, explanations, or any conversational text.
+2.  **COMPONENT NAMING:** The component MUST be a single functional component named exactly \`LandingPage\`.
+3.  **COMPONENT STRUCTURE:** The component definition MUST follow this exact structure: \`const LandingPage: React.FC = () => { ... };\`
+4.  **DEFAULT EXPORT:** The final, absolute last line of your code MUST be exactly: \`export default LandingPage;\`
+5.  **IMPORTS FIRST:** Your code must start directly with all necessary import statements.
+6.  **'use client' SPARINGLY:** Only add the \`'use client';\` directive if using interactive animations ('whileHover') or React hooks ('useState'). For simple entrance animations ('initial', 'whileInView'), 'use client' MUST be omitted for better performance.
 
 ---
 
-### DESIGN & TOOLKIT GUIDE
+### ARCHITECTURAL & DESIGN PRINCIPLES
 
-You have a powerful toolkit available. You MUST import components before using them.
+You MUST adhere to these principles to ensure a high-quality, professional layout.
+
+1.  **Structure & Semantics:**
+    -   The root element of the component MUST be a \`<main>\` tag.
+    -   Each major part of the page (Hero, Features, Testimonials, etc.) MUST be wrapped in a \`<section>\` tag with a unique \`id\`.
+    -   Use a main container div inside each section for width and centering: \`className="container mx-auto px-4"\`.
+    -   Use generous vertical spacing between sections, e.g., \`py-16 md:py-20\`.
+
+2.  **Responsiveness:**
+    -   Design mobile-first. Use responsive prefixes (\`md:\`, \`lg:\`) extensively for grids, typography, and spacing.
+
+3.  **Icons:**
+    -   You do NOT have an icon library. For all icons, you MUST render simple, inline SVGs.
+    -   *Example SVG:* \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="..." /></svg>\`
+
+---
+
+### COMPONENT & FONT TOOLKIT
+
+This is your available design system. You MUST import components before using them.
 
 #### 1. Font Selection (Choose ONE per page)
-Apply one of these Tailwind CSS classes to the main parent container to set the global typography. Default to 'font-sans' if unsure.
--   **Modern/Default:** \`className="font-sans"\` (Uses 'Inter' font)
--   **Elegant/Traditional:** \`className="font-serif"\` (Uses 'Lora' font)
--   **Techy/Futuristic:** \`className="font-mono"\` (Uses 'Roboto Mono' font)
--   *Example:* \`<main className="font-sans bg-slate-900 text-white">\`
+Apply ONE of these classes to the root \`<main>\` tag.
+-   **Modern/Default:** \`className="font-sans"\` (Inter)
+-   **Elegant/Traditional:** \`className="font-serif"\` (Lora)
+-   **Techy/Futuristic:** \`className="font-mono"\` (Roboto Mono)
 
-#### 2. Component Library: shadcn/ui
-You MUST import components from their exact paths.
-
-**Layout & Structure:**
--   **Card:** For grouping content.
-    -   Import: \`import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";\`
--   **Accordion:** For collapsible FAQ sections.
-    -   Import: \`import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";\`
--   **Tabs:** For switching between content panels.
-    -   Import: \`import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";\`
-
-**Navigation & Actions:**
+#### 2. Component Library: shadcn/ui (Import from \`@/components/ui/...\`)
 -   **Button:** For calls to action.
-    -   Import: \`import { Button } from "@/components/ui/button";\`
--   **Navigation Menu:** For the main site header.
-    -   Import: \`import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";\`
--   **Dialog:** For modal popups.
-    -   Import: \`import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";\`
-
-**Forms & Input:**
--   **Input:** For text fields.
-    -   Import: \`import { Input } from "@/components/ui/input";\`
--   **Label:** To label form fields.
-    -   Import: \`import { Label } from "@/components/ui/label";\`
--   **Textarea:** For multi-line text input.
-    -   Import: \`import { Textarea } from "@/components/ui/textarea";\`
-
-**Data Display:**
--   **Avatar:** For testimonials or team sections.
-    -   Import: \`import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";\`
--   **Badge:** To highlight features or status.
-    -   Import: \`import { Badge } from "@/components/ui/badge";\`
--   **Alert:** For important notices.
-    -   Import: \`import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";\`
+-   **Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter:** For feature sections, testimonials, pricing tiers.
+-   **Accordion, AccordionItem, AccordionTrigger, AccordionContent:** For FAQ sections.
+-   **Tabs, TabsList, TabsTrigger, TabsContent:** For switching between views like monthly/yearly pricing.
+-   **NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink:** For the main site header.
+-   **Input, Label, Textarea:** For contact forms.
+-   **Avatar, AvatarImage, AvatarFallback:** For testimonial author images.
+-   **Badge:** To highlight features or plan names.
+-   **Alert, AlertTitle, AlertDescription:** For important notices.
+-   **Table, TableHeader, TableRow, TableHead, TableBody, TableCell:** For detailed feature comparisons.
 
 #### 3. Animations: Framer Motion
 -   Import: \`import { motion } from "framer-motion";\`
--   Use \`<motion.div>\` for animated elements.
--   Animate elements into view: \`<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>...</motion.div>\`
+-   Apply subtle entrance animations to enhance the user experience.
+-   *Example:* \`<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>\`
 
 ---
 
 ### FINAL TASK
-Generate a complete, single-file landing page component based on the following user prompt. Ensure you create detailed, compelling, and benefit-driven placeholder content that matches the business theme described.
+
+**Your Task:** Generate a complete, single-file Next.js landing page component for \`app/page.tsx\` based on the user's prompt. Create detailed, compelling placeholder content that is thematically aligned with the request. Adhere to all rules specified above.
 
 **User Prompt:** "${prompt}"
 `;
@@ -500,7 +498,12 @@ Generate a complete, single-file landing page component based on the following u
                 await newRepoGit.addConfig('user.name', githubUsername);
                 await newRepoGit.addConfig('user.email', `${githubUsername}@users.noreply.github.com`);
                 
+                // This is the new, corrected code
                 const pageTsxPath = path.join(newClientRepoPath, 'src', 'app', 'page.tsx');
+
+                // ADD THIS LINE: Ensure the parent directory exists before writing the file
+                await fs.mkdir(path.dirname(pageTsxPath), { recursive: true });
+
                 await fs.writeFile(pageTsxPath, generatedCode);
 
                 await newRepoGit.add('.');

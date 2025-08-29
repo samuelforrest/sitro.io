@@ -292,75 +292,103 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with GPT-4.1
             console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
-            const reactGenerationPrompt = `You are an AI front-end engineer, who follows all commands given perfectly accurately. Your mission is to generate a single, production-ready Next.js 'page.tsx' file. You MUST follow the file structure template and rules below with absolute precision. Any deviation will cause a build failure.
+            const reactGenerationPrompt = `You are an AI front-end engineer. You MUST generate EXACTLY ONE production-ready Next.js 'page.tsx' file that follows the template below with ZERO deviations.
 
-### MANDATORY FILE STRUCTURE TEMPLATE
-Your entire output MUST match this exact structure. This is not a suggestion; it is a strict requirement.
+### ABSOLUTELY MANDATORY: FOLLOW THIS EXACT STRUCTURE
+
+Your response must be ONLY the code block below, with NO additional text, explanations, or markdown outside the code block.
 
 \`\`\`tsx
-// 1. 'use client' MUST be the absolute first line.
 'use client';
 
-// 2. All imports come next. No duplicates.
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Rocket, CheckCircle, Shield, ArrowRight, Twitter, Linkedin, Github } from 'lucide-react';
-
-// 3. Each shadcn/ui component is imported from its OWN file.
+import { [ICON_NAMES_HERE] } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-// ... add other shadcn/ui imports here, one per line ...
 
-// 4. The component definition is next.
 const LandingPage: React.FC = () => {
-  // Your entire page JSX goes here.
-  // The root element MUST be a <main> tag.
   return (
     <main className="font-sans">
-      {/* ... page content ... */}
+      {/* Your page content here */}
     </main>
   );
 };
 
-// 5. The default export MUST be the absolute last line.
 export default LandingPage;
 \`\`\`
 
----
+### NON-NEGOTIABLE REQUIREMENTS:
 
-### CRITICAL RULES (Reinforcing the Template)
--   **No Unused Imports:** Only import the components and icons you actually use in the JSX. Your code must be clean.
--   **Use '&apos;' in JSX Attributes:** For any text inside a JSX prop (like \`placeholder="User&apos;s Name"\`), you MUST use \`&apos;\` instead of a raw apostrophe (').
--   **Architecture:** Use \`<section>\` tags with unique \`id\`s for each page block (Hero, Features, etc.). Use a container div (\`className="container mx-auto px-4"\`) inside each section for centering.
--   **Responsiveness:** Design mobile-first. Use responsive prefixes (\`md:\`, \`lg:\`) on almost every element to ensure the layout is perfect on all screen sizes.
+1. **FIRST LINE RULE**: The very first line MUST be 'use client'; with NO comments, spaces, or any other text before it.
 
----
+2. **SINGLE FRAMER-MOTION IMPORT**: You are FORBIDDEN from importing framer-motion more than once. Use only: \`import { motion } from 'framer-motion';\`
 
-### TOOLKIT REFERENCE
-This is your available design system. Use it according to the rules and structure defined in the template above.
+3. **APOSTROPHE RULE**: In ALL JSX attributes containing text with apostrophes, you MUST use &apos; instead of '. Examples:
+   - CORRECT: \`placeholder="User&apos;s Name"\`
+   - WRONG: \`placeholder="User's Name"\`
+   - CORRECT: \`alt="Company&apos;s logo"\`
 
-1.  **ICONS: Lucide React**
-    -   Import any needed icon from 'lucide-react'. Consolidate into a single import line.
+4. **QUOTATION MARK RULE**: In ALL JSX attributes containing text with quotes, you MUST use &quot; instead of ". Examples:
+   - CORRECT: \`title="He said &quot;Hello&quot;"\`
+   - WRONG: \`title="He said "Hello""\`
 
-2.  **FONTS**
-    -   Apply ONE class to the root \`<main>\` tag: \`font-sans\` (Default), \`font-serif\`, or \`font-mono\`.
+5. **STRUCTURE ORDER** (MANDATORY):
+   - Line 1: 'use client';
+   - Lines 2-3: Empty lines
+   - Import React
+   - Import framer-motion (ONCE ONLY)
+   - Import lucide-react icons (consolidated into ONE line)
+   - Import shadcn/ui components (one import per line)
+   - Empty line
+   - Component definition
+   - Empty line
+   - export default LandingPage;
 
-3.  **UI LIBRARY: shadcn/ui**
-    -   Remember: one import line per component file (e.g., \`import { Button } from "@/components/ui/button";\`).
+### VALIDATION CHECKLIST - YOUR CODE MUST PASS ALL:
+□ First line is exactly: 'use client';
+□ framer-motion appears in imports EXACTLY once
+□ All apostrophes in JSX props use &apos;
+□ All quotes in JSX props use &quot;
+□ All icons imported in ONE consolidated lucide-react line
+□ Only icons that are actually used are imported
+□ Root <main> element has exactly ONE font class (font-sans, font-serif, or font-mono)
+□ No unused imports
+□ Component uses <main> as root element
+□ Ends with: export default LandingPage;
 
-4.  **ANIMATIONS: Framer Motion**
-    -   Import from 'framer-motion'.
-    -   Use for subtle entrance animations: \`<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>\`
+### EXAMPLES OF CORRECT PATTERNS:
 
----
+**Correct apostrophe usage:**
+\`\`\`tsx
+<Input placeholder="Enter user&apos;s email address" />
+<img alt="Client&apos;s testimonial photo" />
+<h1>Welcome to John&apos;s Portfolio</h1>
+\`\`\`
 
-### FINAL TASK
-Generate a complete, single-file Next.js landing page component for \`app/page.tsx\` based on the user's prompt. Ensure the code is filled with high-quality, thematic placeholder content and adheres strictly to the mandatory file structure template.
+**Correct quote usage:**
+\`\`\`tsx
+<div title="The CEO said &quot;Innovation is key&quot;">
+<Button aria-label="Click &quot;Submit&quot; to continue">
+\`\`\`
 
-**User Prompt:** "${prompt}"
-`;
+**Correct icon usage:**
+\`\`\`tsx
+import { Rocket, CheckCircle, Shield, ArrowRight } from 'lucide-react';
+// In JSX:
+<Rocket className="w-6 h-6 text-blue-500" />
+<CheckCircle className="w-4 h-4" />
+\`\`\`
+
+**Correct font usage:**
+\`\`\`tsx
+<main className="font-sans">  {/* or font-serif, font-mono */}
+\`\`\`
+
+### YOUR TASK:
+Generate the complete page.tsx file for: "${prompt}"
+
+REMEMBER: Your entire response should be ONLY the code block. No explanations, no additional text. Just the tsx code block that passes all validation points above.`;
 
             let generatedCodeRaw;
             try {

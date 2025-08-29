@@ -296,55 +296,58 @@ app.post('/generate-and-deploy', async (req, res) => {
 
 ### CRITICAL BUILD RULES (NON-NEGOTIABLE)
 
-1.  **THE FILE CONTRACT:** Your entire output MUST strictly adhere to this file structure.
-    -   **LINE 1: 'use client';** The string \`'use client';\` MUST be the absolute first line of the file. Nothing, not even a comment or whitespace, can precede it.
-    -   **FINAL LINE: export default LandingPage;** The absolute last line of the file MUST be \`export default LandingPage;\`.
+1.  **FILE STRUCTURE:**
+    -   **LINE 1 MUST BE 'use client';**: The string \`'use client';\` MUST be the absolute first line of the file. Nothing can precede it.
+    -   **FINAL LINE MUST BE EXPORT:** The absolute last line of the file MUST be \`export default LandingPage;\`.
 
-2.  **IMPORTING RULES (MANDATORY):**
-    -   **NO DUPLICATE PACKAGE IMPORTS:** You are FORBIDDEN from having more than one import statement for the same package. Consolidate all items into a single line.
-        -   **CORRECT:** \`import { motion, AnimatePresence } from "framer-motion";\`
-        -   **FORBIDDEN:** Having two separate lines importing from 'framer-motion'.
+2.  **IMPORTING RULES:**
+    -   **NO DUPLICATE IMPORTS:** You are FORBIDDEN from having more than one import statement for the same package. Consolidate all needed items into a single line.
     -   **ONE COMPONENT PER SHADCN IMPORT:** Every shadcn/ui component MUST be imported from its own unique file path. Bundling is FORBIDDEN.
-        -   **CORRECT:**
-            \`import { Input } from "@/components/ui/input";\`
-            \`import { Label } from "@/components/ui/label";\`
-        -   **FORBIDDEN:** \`import { Input, Label } from "@/components/ui/input";\`
-    -   **NO UNUSED IMPORTS:** Every single component, hook, or variable you import MUST be used in the JSX. Your code must be clean and production-ready, like a senior engineer wrote it.
+    -   **NO UNUSED IMPORTS:** Every single component, hook, or variable you import MUST be used in the JSX. Your code must be clean.
 
 3.  **JSX SYNTAX RULES:**
-    -   **USE '&apos;' FOR APOSTROPHES:** In any text inside a JSX attribute (like \`placeholder\` or \`aria-label\`), you MUST use the HTML entity \`&apos;\` instead of a raw apostrophe (').
-        -   **CORRECT:** \`placeholder="Enter the user&apos;s email"\`
-        -   **FORBIDDEN:** \`placeholder="Enter the user's email"\`
+    -   **QUOTATION MARKS:** When defining JSX attributes, prefer using single quotes to avoid conflicts (e.g., \`placeholder='A "quoted" word'\`). If you must use double quotes for an attribute's value, you MUST escape any inner double quotes with the HTML entity \`&quot;\`.
+        -   **CORRECT:** \`placeholder="A &quot;quoted&quot; word"\`
+        -   **CORRECT:** \`placeholder='A "quoted" word'\`
+        -   **FORBIDDEN:** \`placeholder="A "quoted" word"\`
+    -   **APOSTROPHES:** Do NOT use the \`&apos;\` entity. Modern JSX handles apostrophes correctly. Write them normally in your text.
 
 ---
 
-### COMPONENT DEFINITION & ARCHITECTURE
+### TOOLKIT & ARCHITECTURE
+You must build the page using only the components and rules defined below.
 
--   **COMPONENT NAME:** The component MUST be a single functional component named exactly \`LandingPage\` and defined as \`const LandingPage: React.FC = () => { ... };\`
--   **STRUCTURE:** The root element MUST be a \`<main>\` tag. Use \`<section>\` tags with unique \`id\`s for each major page block. Use a container div (\`className="container mx-auto px-4"\`) inside each section for centering.
--   **RESPONSIVENESS:** Design mobile-first. Use responsive prefixes (\`md:\`, \`lg:\`) on all layouts, typography, and spacing to ensure a flawless experience on all screen sizes.
+1.  **COMPONENT DEFINITION:**
+    -   The component MUST be named exactly \`LandingPage\` and defined as \`const LandingPage: React.FC = () => { ... };\`
+    -   The root element MUST be a \`<main>\` tag. Use \`<section>\` tags with unique \`id\`s for each page block. Center content with \`className="container mx-auto px-4"\`.
+
+2.  **ICON USAGE (CRITICAL RULE):**
+    -   You are FORBIDDEN from using any icon not on this curated list. This prevents build errors from non-existent icons.
+    -   **Pre-Approved Icon List:** \`Rocket\`, \`Shield\`, \`CheckCircle\`, \`XCircle\`, \`Award\`, \`BarChart2\`, \`Briefcase\`, \`Users\`, \`Heart\`, \`Mail\`, \`Phone\`, \`ArrowRight\`, \`Menu\`, \`Twitter\`, \`Linkedin\`, \`Github\`, \`Check\`, \`Info\`.
+    -   **Import Example:** \`import { Rocket, CheckCircle, ArrowRight } from 'lucide-react';\`
+
+3.  **FONTS:**
+    -   Apply ONE class to the root \`<main>\` tag: \`font-sans\` (Default), \`font-serif\`, or \`font-mono\`.
+
+4.  **UI LIBRARY: shadcn/ui:**
+    -   Remember the "one import per file" rule.
+    -   Available: \`Button\`, \`Card\` (and sub-components), \`Accordion\` (and sub-components), \`Input\`, \`Label\`, \`Textarea\`, \`Avatar\` (and sub-components), \`Badge\`, \`Alert\` (and sub-components).
+
+5.  **ANIMATIONS: Framer Motion:**
+    -   Import from 'framer-motion'.
+    -   Use for subtle entrance animations: \`<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}>\`
 
 ---
 
-### TOOLKIT REFERENCE (Follow all rules above)
+### FINAL TASK & MANDATORY REVIEW
+**TASK:** Generate a complete, single-file Next.js landing page component based on the user's prompt.
 
-1.  **ICONS: Lucide React** (Import from 'lucide-react', consolidate into one line)
-2.  **FONTS** (Apply ONE class to the root \`<main>\` tag: \`font-sans\`, \`font-serif\`, or \`font-mono\`)
-3.  **UI LIBRARY: shadcn/ui** (Remember: one import per component file)
-4.  **ANIMATIONS: Framer Motion** (Import from 'framer-motion', consolidate into one line)
-
----
-
-### FINAL TASK & MANDATORY LINTER REVIEW
-
-**TASK:** Generate a complete, single-file Next.js landing page component for \`app/page.tsx\` based on the user's prompt. Fill it with high-quality, thematic placeholder content.
-
-**MANDATORY REVIEW:** Before outputting your code, you must perform this mental self-linting process. If the answer to any question is NO, you MUST fix your code before finishing.
-1.  Is \`'use client';\` the absolute first line with nothing before it? YES/NO
+**MANDATORY REVIEW:** Before finishing, you must perform this mental self-review. If any answer is NO, you MUST fix your code.
+1.  Is \`'use client';\` the absolute first line? YES/NO
 2.  Is there ONLY ONE import statement for 'framer-motion' and ONLY ONE for 'lucide-react'? YES/NO
-3.  Have I checked EVERY shadcn import to ensure each component comes from its own unique file? YES/NO
-4.  Have I scanned my final list of imports and deleted every single one that is NOT used in the JSX? YES/NO
-5.  Have I searched my JSX for any apostrophes inside attributes and replaced them with \`&apos;\`? YES/NO
+3.  Have I ONLY used icons from the pre-approved list provided in this prompt? YES/NO
+4.  Have I deleted every single unused import? YES/NO
+5.  Have I checked my JSX attributes for unescaped double quotes? YES/NO
 6.  Is the absolute LAST line of the file \`export default LandingPage;\`? YES/NO
 
 **User Prompt:** "${prompt}"

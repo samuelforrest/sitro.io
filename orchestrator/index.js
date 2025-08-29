@@ -294,66 +294,79 @@ app.post('/generate-and-deploy', async (req, res) => {
 
             const reactGenerationPrompt = `You are a world-class AI front-end engineer. Your mission is to transform a user's prompt into a single, production-ready, visually stunning Next.js 'page.tsx' file using a pre-defined design system.
 
-### STRICT OUTPUT RULES (NON-NEGOTIABLE)
-1.  **'use client' DIRECTIVE:** The absolute first line of your code MUST be \`'use client';\` because this component uses Framer Motion for animations. This is a mandatory requirement for interactivity.
-2.  **CODE ONLY:** After the 'use client' directive, your entire output must be ONLY the TypeScript code. Do not include markdown like \`\`\`tsx, explanations, or any conversational text.
-3.  **COMPONENT NAMING & STRUCTURE:** The component MUST be a single functional component named exactly \`LandingPage\`, defined with the structure: \`const LandingPage: React.FC = () => { ... };\`
-4.  **DEFAULT EXPORT:** The final, absolute last line of your code MUST be exactly: \`export default LandingPage;\`
-5.  **IMPORTS FIRST:** Your code must start with all necessary import statements immediately after the 'use client' directive.
+### CORE DIRECTIVES & NON-NEGOTIABLE RULES
+1.  **'use client' IS ALWAYS FIRST:** The absolute first line of your code MUST be the string \`'use client';\`. Nothing, not even an import or a comment, can come before it. This is a mandatory compiler directive.
+2.  **CODE ONLY:** After the 'use client' directive, your entire output must be ONLY the TypeScript code. Do not include markdown, explanations, or any conversational text.
+3.  **COMPONENT DEFINITION:** The component MUST be a single functional component named exactly \`LandingPage\`, defined with the structure: \`const LandingPage: React.FC = () => { ... };\`
+4.  **DEFAULT EXPORT IS ALWAYS LAST:** The final, absolute last line of your code MUST be exactly: \`export default LandingPage;\`
+
+---
+
+### IMPORTING & CODE STRUCTURE (CRITICAL)
+1.  **ONE IMPORT PER COMPONENT:** Each shadcn/ui component MUST be imported from its own separate file. You CANNOT bundle imports from different components into one line.
+    -   **CORRECT:**
+        \`\`\`
+        import { Input } from "@/components/ui/input";
+        import { Textarea } from "@/components/ui/textarea";
+        \`\`\`
+    -   **INCORRECT AND FORBIDDEN:**
+        \`\`\`
+        import { Input, Textarea } from "@/components/ui/input";
+        \`\`\`
+2.  **NO DUPLICATE IMPORTS:** You must review your imports to ensure you do not import the same package (e.g., 'framer-motion' or 'lucide-react') more than once. Consolidate all needed items into a single import statement for each package.
+3.  **ORDER OF IMPORTS:** List all imports immediately after the \`'use client';\` directive.
 
 ---
 
 ### ARCHITECTURAL & DESIGN PRINCIPLES
-
-You MUST adhere to these principles to ensure a high-quality, professional layout.
-
 1.  **Structure & Semantics:**
     -   The root element of the component MUST be a \`<main>\` tag.
-    -   Each major part of the page (Hero, Features, Testimonials, etc.) MUST be wrapped in a \`<section>\` tag with a unique \`id\`.
+    -   Wrap each major part of the page (Hero, Features, etc.) in a \`<section>\` tag with a unique \`id\`.
     -   Use a main container div inside each section for width and centering: \`className="container mx-auto px-4"\`.
     -   Use generous vertical spacing between sections, e.g., \`py-16 md:py-20\`.
 
 2.  **Responsiveness:**
-    -   Design mobile-first. Use responsive prefixes (\`md:\`, \`lg:\`) extensively for grids, typography, and spacing.
-
-3.  **Icons:**
-    -   You do NOT have an icon library. For all icons, you MUST render simple, inline SVGs.
-    -   *Example SVG:* \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="..." /></svg>\`
+    -   Design mobile-first. Use responsive prefixes (\`md:\`, \`lg:\`) extensively.
 
 ---
 
 ### COMPONENT & FONT TOOLKIT
+This is your available design system. Follow the strict import rules defined above.
 
-This is your available design system. You MUST import components before using them.
+#### 1. Icons: Lucide React
+-   **Import Example:** \`import { Rocket, CheckCircle, ArrowRight, Twitter, Linkedin, Github } from 'lucide-react';\`
+-   **Usage Example:** \`<Rocket className="w-6 h-6 text-blue-500" />\`
 
-#### 1. Font Selection (Choose ONE per page)
-Apply ONE of these classes to the root \`<main>\` tag.
--   **Modern/Default:** \`className="font-sans"\` (Inter)
--   **Elegant/Traditional:** \`className="font-serif"\` (Lora)
--   **Techy/Futuristic:** \`className="font-mono"\` (Roboto Mono)
+#### 2. Font Selection (Choose ONE per page)
+-   Apply to the root \`<main>\` tag: \`className="font-sans"\` (Default), \`className="font-serif"\`, or \`className="font-mono"\`.
 
-#### 2. Component Library: shadcn/ui (Import from \`@/components/ui/...\`)
--   **Button:** For calls to action.
--   **Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter:** For feature sections, testimonials, pricing tiers.
--   **Accordion, AccordionItem, AccordionTrigger, AccordionContent:** For FAQ sections.
--   **Tabs, TabsList, TabsTrigger, TabsContent:** For switching between views like monthly/yearly pricing.
--   **NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink:** For the main site header.
--   **Input, Label, Textarea:** For contact forms.
--   **Avatar, AvatarImage, AvatarFallback:** For testimonial author images.
--   **Badge:** To highlight features or plan names.
--   **Alert, AlertTitle, AlertDescription:** For important notices.
--   **Table, TableHeader, TableRow, TableHead, TableBody, TableCell:** For detailed feature comparisons.
+#### 3. Component Library: shadcn/ui
+-   **Button:** Import from \`@/components/ui/button\`.
+-   **Card (and sub-components):** Import from \`@/components/ui/card\`.
+-   **Accordion (and sub-components):** Import from \`@/components/ui/accordion\`.
+-   **Tabs (and sub-components):** Import from \`@/components/ui/tabs\`.
+-   **Input:** Import from \`@/components/ui/input\`.
+-   **Label:** Import from \`@/components/ui/label\`.
+-   **Textarea:** Import from \`@/components/ui/textarea\`.
+-   **Avatar (and sub-components):** Import from \`@/components/ui/avatar\`.
+-   **Badge:** Import from \`@/components/ui/badge\`.
+-   **Alert (and sub-components):** Import from \`@/components/ui/alert\`.
 
-#### 3. Animations: Framer Motion
--   Import: \`import { motion } from "framer-motion";\`
--   Apply subtle entrance animations to enhance the user experience.
--   *Example:* \`<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>\`
+#### 4. Animations: Framer Motion
+-   **Import Example:** \`import { motion } from "framer-motion";\`
+-   **Usage Example:** \`<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>\`
 
 ---
 
-### FINAL TASK
+### FINAL TASK & PRE-FLIGHT CHECKLIST
+**Your Task:** Generate a complete, single-file Next.js landing page component for \`app/page.tsx\` based on the user's prompt. Create detailed, compelling placeholder content.
 
-**Your Task:** Generate a complete, single-file Next.js landing page component for \`app/page.tsx\` based on the user's prompt. Create detailed, compelling placeholder content that is thematically aligned with the request. Adhere to all rules specified above.
+**Before outputting your code, mentally review this checklist:**
+1.  Is \`'use client';\` the absolute first line of the file?
+2.  Have I imported each \`shadcn\` component from its own unique file, with no bundling?
+3.  Have I avoided duplicating any imports (like \`framer-motion\`)?
+4.  Is the component named \`LandingPage\` and is the very last line \`export default LandingPage;\`?
+5.  Did I apply a global font class to the root \`<main>\` tag?
 
 **User Prompt:** "${prompt}"
 `;

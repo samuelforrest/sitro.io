@@ -296,7 +296,7 @@ app.post('/generate-and-deploy', async (req, res) => {
 
 ### CORE DIRECTIVES & NON-NEGOTIABLE RULES
 1.  **'use client' IS ALWAYS FIRST:** The absolute first line of your code MUST be the string \`'use client';\`. Nothing, not even an import or a comment, can come before it. This is a mandatory compiler directive.
-2.  **CODE ONLY:** After the 'use client' directive, your entire output must be ONLY the TypeScript code. Do not include markdown, explanations, or any conversational text.
+2.  **CODE ONLY:** After the 'use client' directive, your entire output must be ONLY the TypeScript code. Do not include markdown, explanations, comments, or any conversational text.
 3.  **COMPONENT DEFINITION:** The component MUST be a single functional component named exactly \`LandingPage\`, defined with the structure: \`const LandingPage: React.FC = () => { ... };\`
 4.  **DEFAULT EXPORT IS ALWAYS LAST:** The final, absolute last line of your code MUST be exactly: \`export default LandingPage;\`
 

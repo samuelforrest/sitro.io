@@ -495,7 +495,7 @@ You must build the page using only the components and rules defined below.
                 throw new Error(`Failed to setup repo and push code: ${gitOpErr.message}`);
             }
 
-            // 5. Create Vercel Project & Trigger Deployment
+            // 5. Create Vercel s Project & Trigger Deployment
             await supabase.from('generated_pages').update({ status: 'deploying' }).eq('id', pageId);
             console.log(`[${pageId}] Status updated to deploying.`);
 

@@ -292,63 +292,83 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with GPT-4.1
             console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
-            const reactGenerationPrompt = `You are a hyper-disciplined AI code generator. Your mission is to convert a user prompt into a single, production-ready Next.js 'page.tsx' file. You have a zero-tolerance policy for errors. Any deviation from the rules below will cause the production build to fail.
+            const reactGenerationPrompt = `You are an expert AI front-end engineer building a production-ready Next.js 'page.tsx' file. Your output must be a single, complete file of flawless TypeScript code. Adhere to all rules with absolute precision.
 
 ### CRITICAL BUILD RULES (NON-NEGOTIABLE)
-
-1.  **FILE STRUCTURE:**
-    -   **LINE 1 MUST BE 'use client';**: The string \`'use client';\` MUST be the absolute first line of the file. Nothing can precede it.
-    -   **FINAL LINE MUST BE EXPORT:** The absolute last line of the file MUST be \`export default LandingPage;\`.
-
-2.  **IMPORTING RULES:**
-    -   **NO DUPLICATE IMPORTS:** You are FORBIDDEN from having more than one import statement for the same package. Consolidate all needed items into a single line.
-    -   **ONE COMPONENT PER SHADCN IMPORT:** Every shadcn/ui component MUST be imported from its own unique file path. Bundling is FORBIDDEN.
-    -   **NO UNUSED IMPORTS:** Every single component, hook, or variable you import MUST be used in the JSX. Your code must be clean.
-
-3.  **JSX SYNTAX RULES:**
-    -   **QUOTATION MARKS:** When defining JSX attributes, prefer using single quotes to avoid conflicts (e.g., \`placeholder='A "quoted" word'\`). If you must use double quotes for an attribute's value, you MUST escape any inner double quotes with the HTML entity \`&quot;\`.
-        -   **CORRECT:** \`placeholder="A &quot;quoted&quot; word"\`
-        -   **CORRECT:** \`placeholder='A "quoted" word'\`
-        -   **FORBIDDEN:** \`placeholder="A "quoted" word"\`
-    -   **APOSTROPHES:** Do NOT use the \`&apos;\` entity. Modern JSX handles apostrophes correctly. Write them normally in your text.
+1.  **FILE STRUCTURE:** The file MUST start with \`'use client';\` on the absolute first line, and MUST end with \`export default LandingPage;\` on the absolute last line.
+2.  **IMPORTS:** All imports go after \`'use client';\`. There can be NO duplicate package imports. Every shadcn/ui component MUST be imported from its own unique file path (e.g., \`@/components/ui/button\`). Only import what you use.
+3.  **JSX SYNTAX:** Use standard JSX. For attributes, prefer single quotes (\`placeholder='...'\`). If a value contains a single quote, use double quotes (\`alt="A user's avatar"\`).
 
 ---
 
-### TOOLKIT & ARCHITECTURE
-You must build the page using only the components and rules defined below.
+### DESIGN SYSTEM & TOOLKIT GUIDE
+You have a complete professional design system. Your task is to select the most appropriate components to fulfill the user's request.
 
-1.  **COMPONENT DEFINITION:**
-    -   The component MUST be named exactly \`LandingPage\` and defined as \`const LandingPage: React.FC = () => { ... };\`
-    -   The root element MUST be a \`<main>\` tag. Use \`<section>\` tags with unique \`id\`s for each page block. Center content with \`className="container mx-auto px-4"\`.
+#### 1. Core Architecture & Layout
+-   **Structure:** Use \`<main>\` as the root, with \`<section>\` tags for each major page block. Center content with a \`container mx-auto px-4\` div.
+-   **Layout:** Use CSS Grid and Flexbox for all layouts (\`grid\`, \`flex\`, \`gap-8\`, etc.). For complex resizing, use \`Resizable\`. For scrollable areas, use \`ScrollArea\`.
 
-2.  **ICON USAGE (CRITICAL RULE):**
-    -   You are FORBIDDEN from using any icon not on this curated list. This prevents build errors from non-existent icons.
-    -   **Pre-Approved Icon List:** \`Rocket\`, \`Shield\`, \`CheckCircle\`, \`XCircle\`, \`Award\`, \`BarChart2\`, \`Briefcase\`, \`Users\`, \`Heart\`, \`Mail\`, \`Phone\`, \`ArrowRight\`, \`Menu\`, \`Twitter\`, \`Linkedin\`, \`Github\`, \`Check\`, \`Info\`.
-    -   **Import Example:** \`import { Rocket, CheckCircle, ArrowRight } from 'lucide-react';\`
+#### 2. Typography & Fonts
+-   Apply ONE global font class to the \`<main>\` tag: \`font-sans\` (Default), \`font-serif\`, or \`font-mono\`.
 
-3.  **FONTS:**
-    -   Apply ONE class to the root \`<main>\` tag: \`font-sans\` (Default), \`font-serif\`, or \`font-mono\`.
+#### 3. Icons: Lucide React
+-   Use icons to add clarity and visual appeal. You have access to a curated list of safe icons.
+-   **Pre-Approved List:** \`Rocket\`, \`Shield\`, \`CheckCircle\`, \`XCircle\`, \`Award\`, \`BarChart2\`, \`Briefcase\`, \`Users\`, \`Heart\`, \`Mail\`, \`Phone\`, \`ArrowRight\`, \`Menu\`, \`Twitter\`, \`Linkedin\`, \`Github\`, \`Check\`, \`Info\`, \`Settings\`, \`Search\`, \`Plus\`, \`Minus\`, \`Calendar\`.
+-   **Import Example:** \`import { Rocket, CheckCircle } from 'lucide-react';\`
 
-4.  **UI LIBRARY: shadcn/ui:**
-    -   Remember the "one import per file" rule.
-    -   Available: \`Button\`, \`Card\` (and sub-components), \`Accordion\` (and sub-components), \`Input\`, \`Label\`, \`Textarea\`, \`Avatar\` (and sub-components), \`Badge\`, \`Alert\` (and sub-components).
+#### 4. Component Usage Guide (shadcn/ui)
+This is your primary toolkit. Choose wisely based on the required functionality.
 
-5.  **ANIMATIONS: Framer Motion:**
-    -   Import from 'framer-motion'.
-    -   Use for subtle entrance animations: \`<motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}>\`
+**Content Display:**
+-   **Card:** The default choice for grouping content (features, testimonials, pricing tiers).
+-   **Accordion:** For collapsible content, ideal for FAQs.
+-   **Tabs:** For switching between distinct panels of content (e.g., Monthly/Yearly plans).
+-   **Carousel:** For a slideshow of images or testimonials.
+-   **Table:** For dense, structured data and feature comparisons.
+-   **Avatar:** For user profile pictures in testimonials.
+-   **Badge:** To highlight status, tags, or small labels on a feature.
+-   **Alert:** To draw attention to important information.
+-   **Skeleton:** To show a loading state placeholder.
+-   **Tooltip:** For extra information on hover.
+-   **Progress:** To show the completion of a task or a value.
+
+**Navigation & Actions:**
+-   **Button:** For all primary user actions (CTAs, submitting forms).
+-   **NavigationMenu:** For the primary site header navigation.
+-   **Pagination:** For navigating between pages of content.
+-   **Breadcrumb:** To show the user's location in a site hierarchy.
+
+**Forms & Input (Use the \`Form\` component for complex forms):**
+-   **Input:** For single-line text fields (email, name).
+-   **Textarea:** For multi-line text input.
+-   **Checkbox:** For on/off toggles.
+-   **Switch:** A more stylish on/off toggle.
+-   **Select:** For dropdown menus where a user picks one option.
+-   **RadioGroup:** For when a user must select one from a visible list of options.
+-   **Slider:** For selecting a value from a range.
+-   **DatePicker / Calendar:** For selecting dates.
+-   **Form:** A wrapper for building complex, validated forms.
+
+**Overlays & Modals:**
+-   **Dialog / AlertDialog:** For modal popups that require user interaction.
+-   **Drawer / Sheet:** For side panels that slide in from the edge of the screen.
+-   **Popover:** For small content overlays triggered by a click.
+-   **HoverCard:** For content overlays triggered by a hover.
+-   **Toast / Sonner:** For small, non-intrusive notifications.
+
+#### 5. Animations: Framer Motion
+-   Import from 'framer-motion'. Use for subtle entrance animations on sections and cards.
 
 ---
 
 ### FINAL TASK & MANDATORY REVIEW
-**TASK:** Generate a complete, single-file Next.js landing page component based on the user's prompt.
+**TASK:** Generate a complete, single-file Next.js landing page component for \`app/page.tsx\` based on the user's prompt. Make intelligent decisions about which components to use to best represent the user's idea. Fill the page with high-quality, thematic placeholder content.
 
-**MANDATORY REVIEW:** Before finishing, you must perform this mental self-review. If any answer is NO, you MUST fix your code.
+**MANDATORY REVIEW:** Before finishing, you MUST perform a mental self-lint. If any answer is NO, you MUST fix your code.
 1.  Is \`'use client';\` the absolute first line? YES/NO
-2.  Is there ONLY ONE import statement for 'framer-motion' and ONLY ONE for 'lucide-react'? YES/NO
-3.  Have I ONLY used icons from the pre-approved list provided in this prompt? YES/NO
-4.  Have I deleted every single unused import? YES/NO
-5.  Have I checked my JSX attributes for unescaped double quotes? YES/NO
-6.  Is the absolute LAST line of the file \`export default LandingPage;\`? YES/NO
+2.  Have I only used icons from the pre-approved list? YES/NO
+3.  Have I deleted every single unused import? YES/NO
+4.  Is the absolute LAST line of the file \`export default LandingPage;\`? YES/NO
 
 **User Prompt:** "${prompt}"
 `;

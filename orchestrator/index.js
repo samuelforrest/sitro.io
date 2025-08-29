@@ -292,25 +292,22 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with GPT-4.1
             console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
-            const reactGenerationPrompt = `You are an AI front-end engineer. You MUST generate EXACTLY ONE production-ready Next.js 'page.tsx' file that follows the template below with ZERO deviations.
+            const reactGenerationPrompt = `Generate EXACTLY ONE tsx code block for a Next.js page.tsx file. Do not generate multiple code blocks or examples.
 
-### ABSOLUTELY MANDATORY: FOLLOW THIS EXACT STRUCTURE
-
-Your response must be ONLY the code block below, with NO additional text, explanations, or markdown outside the code block.
+Your response must start immediately with this exact structure:
 
 \`\`\`tsx
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { [ICON_NAMES_HERE] } from 'lucide-react';
+import { [ICONS_HERE] } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 const LandingPage: React.FC = () => {
   return (
     <main className="font-sans">
-      {/* Your page content here */}
+      {/* content */}
     </main>
   );
 };
@@ -318,77 +315,15 @@ const LandingPage: React.FC = () => {
 export default LandingPage;
 \`\`\`
 
-### NON-NEGOTIABLE REQUIREMENTS:
+CRITICAL: 
+- Generate ONLY ONE code block
+- First line must be 'use client';
+- No text before the code block
+- No example code blocks
+- Use &apos; for apostrophes in JSX
+- Use &quot; for quotes in JSX
 
-1. **FIRST LINE RULE**: The very first line MUST be 'use client'; with NO comments, spaces, or any other text before it.
-
-2. **SINGLE FRAMER-MOTION IMPORT**: You are FORBIDDEN from importing framer-motion more than once. Use only: \`import { motion } from 'framer-motion';\`
-
-3. **APOSTROPHE RULE**: In ALL JSX attributes containing text with apostrophes, you MUST use &apos; instead of '. Examples:
-   - CORRECT: \`placeholder="User&apos;s Name"\`
-   - WRONG: \`placeholder="User's Name"\`
-   - CORRECT: \`alt="Company&apos;s logo"\`
-
-4. **QUOTATION MARK RULE**: In ALL JSX attributes containing text with quotes, you MUST use &quot; instead of ". Examples:
-   - CORRECT: \`title="He said &quot;Hello&quot;"\`
-   - WRONG: \`title="He said "Hello""\`
-
-5. **STRUCTURE ORDER** (MANDATORY):
-   - Line 1: 'use client';
-   - Lines 2-3: Empty lines
-   - Import React
-   - Import framer-motion (ONCE ONLY)
-   - Import lucide-react icons (consolidated into ONE line)
-   - Import shadcn/ui components (one import per line)
-   - Empty line
-   - Component definition
-   - Empty line
-   - export default LandingPage;
-
-### VALIDATION CHECKLIST - YOUR CODE MUST PASS ALL:
-□ First line is exactly: 'use client';
-□ framer-motion appears in imports EXACTLY once
-□ All apostrophes in JSX props use &apos;
-□ All quotes in JSX props use &quot;
-□ All icons imported in ONE consolidated lucide-react line
-□ Only icons that are actually used are imported
-□ Root <main> element has exactly ONE font class (font-sans, font-serif, or font-mono)
-□ No unused imports
-□ Component uses <main> as root element
-□ Ends with: export default LandingPage;
-
-### EXAMPLES OF CORRECT PATTERNS:
-
-**Correct apostrophe usage:**
-\`\`\`tsx
-<Input placeholder="Enter user&apos;s email address" />
-<img alt="Client&apos;s testimonial photo" />
-<h1>Welcome to John&apos;s Portfolio</h1>
-\`\`\`
-
-**Correct quote usage:**
-\`\`\`tsx
-<div title="The CEO said &quot;Innovation is key&quot;">
-<Button aria-label="Click &quot;Submit&quot; to continue">
-\`\`\`
-
-**Correct icon usage:**
-\`\`\`tsx
-import { Rocket, CheckCircle, Shield, ArrowRight } from 'lucide-react';
-// In JSX:
-<Rocket className="w-6 h-6 text-blue-500" />
-<CheckCircle className="w-4 h-4" />
-\`\`\`
-
-**Correct font usage:**
-\`\`\`tsx
-<main className="font-sans">  {/* or font-serif, font-mono */}
-\`\`\`
-
-### YOUR TASK:
-Generate the complete page.tsx file for: "${prompt}"
-
-REMEMBER: Your entire response should be ONLY the code block. No explanations, no additional text. Just the tsx code block that passes all validation points above.`;
+Task: ${prompt}`;
 
             let generatedCodeRaw;
             try {

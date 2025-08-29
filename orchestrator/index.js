@@ -292,26 +292,63 @@ app.post('/generate-and-deploy', async (req, res) => {
             // 2. Generate React/TS/Tailwind Code with GPT-4.1
             console.log(`[${pageId}] Calling OpenAI API with model: ${gptModel}...`);
 
-            const reactGenerationPrompt = `Return this exact structure filled with content for: ${prompt}
+            const reactGenerationPrompt = `You are a hyper-disciplined AI code generator. Your mission is to convert a user prompt into a single, production-ready Next.js 'page.tsx' file. You have a zero-tolerance policy for errors. Any deviation from the rules below will cause the production build to fail.
 
-'use client';
+### CRITICAL BUILD RULES (NON-NEGOTIABLE)
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { [FILL_ICONS] } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+1.  **THE FILE CONTRACT:** Your entire output MUST strictly adhere to this file structure.
+    -   **LINE 1: 'use client';** The string \`'use client';\` MUST be the absolute first line of the file. Nothing, not even a comment or whitespace, can precede it.
+    -   **FINAL LINE: export default LandingPage;** The absolute last line of the file MUST be \`export default LandingPage;\`.
 
-const LandingPage: React.FC = () => {
-  return (
-    <main className="font-sans">
-      [FILL_CONTENT]
-    </main>
-  );
-};
+2.  **IMPORTING RULES (MANDATORY):**
+    -   **NO DUPLICATE PACKAGE IMPORTS:** You are FORBIDDEN from having more than one import statement for the same package. Consolidate all items into a single line.
+        -   **CORRECT:** \`import { motion, AnimatePresence } from "framer-motion";\`
+        -   **FORBIDDEN:** Having two separate lines importing from 'framer-motion'.
+    -   **ONE COMPONENT PER SHADCN IMPORT:** Every shadcn/ui component MUST be imported from its own unique file path. Bundling is FORBIDDEN.
+        -   **CORRECT:**
+            \`import { Input } from "@/components/ui/input";\`
+            \`import { Label } from "@/components/ui/label";\`
+        -   **FORBIDDEN:** \`import { Input, Label } from "@/components/ui/input";\`
+    -   **NO UNUSED IMPORTS:** Every single component, hook, or variable you import MUST be used in the JSX. Your code must be clean and production-ready, like a senior engineer wrote it.
 
-export default LandingPage;
+3.  **JSX SYNTAX RULES:**
+    -   **USE '&apos;' FOR APOSTROPHES:** In any text inside a JSX attribute (like \`placeholder\` or \`aria-label\`), you MUST use the HTML entity \`&apos;\` instead of a raw apostrophe (').
+        -   **CORRECT:** \`placeholder="Enter the user&apos;s email"\`
+        -   **FORBIDDEN:** \`placeholder="Enter the user's email"\`
 
-Replace [FILL_ICONS] and [FILL_CONTENT] appropriately. Use &apos; and &quot; in JSX.`;
+---
+
+### COMPONENT DEFINITION & ARCHITECTURE
+
+-   **COMPONENT NAME:** The component MUST be a single functional component named exactly \`LandingPage\` and defined as \`const LandingPage: React.FC = () => { ... };\`
+-   **STRUCTURE:** The root element MUST be a \`<main>\` tag. Use \`<section>\` tags with unique \`id\`s for each major page block. Use a container div (\`className="container mx-auto px-4"\`) inside each section for centering.
+-   **RESPONSIVENESS:** Design mobile-first. Use responsive prefixes (\`md:\`, \`lg:\`) on all layouts, typography, and spacing to ensure a flawless experience on all screen sizes.
+
+---
+
+### TOOLKIT REFERENCE (Follow all rules above)
+
+1.  **ICONS: Lucide React** (Import from 'lucide-react', consolidate into one line)
+2.  **FONTS** (Apply ONE class to the root \`<main>\` tag: \`font-sans\`, \`font-serif\`, or \`font-mono\`)
+3.  **UI LIBRARY: shadcn/ui** (Remember: one import per component file)
+4.  **ANIMATIONS: Framer Motion** (Import from 'framer-motion', consolidate into one line)
+
+---
+
+### FINAL TASK & MANDATORY LINTER REVIEW
+
+**TASK:** Generate a complete, single-file Next.js landing page component for \`app/page.tsx\` based on the user's prompt. Fill it with high-quality, thematic placeholder content.
+
+**MANDATORY REVIEW:** Before outputting your code, you must perform this mental self-linting process. If the answer to any question is NO, you MUST fix your code before finishing.
+1.  Is \`'use client';\` the absolute first line with nothing before it? YES/NO
+2.  Is there ONLY ONE import statement for 'framer-motion' and ONLY ONE for 'lucide-react'? YES/NO
+3.  Have I checked EVERY shadcn import to ensure each component comes from its own unique file? YES/NO
+4.  Have I scanned my final list of imports and deleted every single one that is NOT used in the JSX? YES/NO
+5.  Have I searched my JSX for any apostrophes inside attributes and replaced them with \`&apos;\`? YES/NO
+6.  Is the absolute LAST line of the file \`export default LandingPage;\`? YES/NO
+
+**User Prompt:** "${prompt}"
+`;
 
             let generatedCodeRaw;
             try {
@@ -333,28 +370,9 @@ Replace [FILL_ICONS] and [FILL_CONTENT] appropriately. Use &apos; and &quot; in 
                 throw new Error(`AI generation failed with OpenAI: ${openaiError.message || 'Unknown OpenAI API error'}`);
             }
 
-            // Your existing cleanup logic (including header and ease fixes)
+
+            // REPLACE THE DELETED BLOCK WITH THIS LINE
             generatedCode = generatedCodeRaw.replace(/```tsx\s*|```/g, '').trim();
-
-            // --- START OF THE BETTER FIX: PROGRAMMATIC HEADER INJECTION ---
-            const requiredHeader = `import { motion } from "framer-motion";\nimport React from "react";\n\n`; // Removed "use client"
-
-            // Clean AI's output by removing any incorrect header it might have tried to generate
-            const cleanGeneratedCode = generatedCode
-                // Remove any imports that AI might try to generate (handled by requiredHeader)
-                .replace(/^import \{ motion \} from "framer-motion";\s*/, '')
-                .replace(/^import React from "react";\s*/, '')
-                .replace(/^import React, \{ useState \} from "react";\s*/, '')
-                // Remove Framer Motion easing imports if GPT generates them
-                .replace(/^import \{ easeIn, easeOut, easeInOut \} from "framer-motion";\s*/, '')
-                // General cleanup
-                .replace(/^\/\/.*?\n/g, '') // Removes single-line comments at the start
-                .replace(/^\s*typescript\s*\n?/i, '') // Removes "typescript" declaration (case-insensitive)
-                .trim();
-
-            // Prepend the absolutely correct header to the cleaned code
-            generatedCode = requiredHeader + cleanGeneratedCode;
-            // --- END OF THE BETTER FIX ---
 
             // --- START OF NEW FIX: PROGRAMMATIC EASE STRING LITERAL/FUNCTION CORRECTION ---
             generatedCode = generatedCode.replace(/ease:\s*(["'])(.*?)\1/g, (match, quoteType, p1) => {
